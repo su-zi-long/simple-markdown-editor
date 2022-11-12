@@ -6,14 +6,12 @@ import postcss from "rollup-plugin-postcss";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 
-import packageJson from "../package.json";
-
 export default {
-  input: packageJson.main, //入口文件
+  input: "src/main.ts", //入口文件
   output: {
-    file: `./dist/${packageJson.name}.js`, //打包后的存放文件
+    file: `./dist/simple-markdown-editor.js`, //打包后的存放文件
     format: "umd", //输出格式 amd es6 iife umd cjs
-    name: packageJson.name, //如果iife,umd需要指定一个全局变量
+    name: "SimpleMarkdownEditor", //如果iife,umd需要指定一个全局变量
   },
   plugins: [
     resolve(),
