@@ -6,6 +6,11 @@ import { IElements } from "../../interface/IElements";
 import { IOptions } from "../../interface/IOptions";
 import { Editor } from "../../main";
 
+/**
+ * 渲染类
+ * 1. 负责渲染编辑器dom
+ * 2. 负责渲染canvas
+ */
 export class Render {
   private editor: Editor;
   private options: IOptions;

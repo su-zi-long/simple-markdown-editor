@@ -2,6 +2,9 @@ interface IEventMap {
   [eventName: string]: Function[];
 }
 
+/**
+ * 事件系统
+ */
 export class Event {
   private eventMap: IEventMap = {};
 
