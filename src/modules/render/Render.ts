@@ -10,6 +10,7 @@ export class Render {
   private editor: Editor;
   private options: IOptions;
   public elements: IElements;
+
   constructor(editor: Editor) {
     this.editor = editor;
     this.options = editor.options;
@@ -44,6 +45,7 @@ export class Render {
       header,
       body,
       footer,
+      canvasContainer,
     };
   }
 

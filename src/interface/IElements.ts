@@ -3,4 +3,5 @@ export interface IElements {
   header: Element;
   body: Element;
   footer: Element;
+  canvasContainer: Element;
 }
