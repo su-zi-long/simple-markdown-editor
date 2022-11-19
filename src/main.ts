@@ -21,6 +21,8 @@ export class Editor {
     this.event = new Event();
     this.render = new Render(this);
     this.interaction = new Interaction(this);
+
+    this.render.render();
   }
 
   private mergeConfiguration(

@@ -1,10 +1,16 @@
+import "../../asset/css/editor.less";
 import "../../asset/css/header.less";
 import "../../asset/css/body.less";
 import "../../asset/css/footer.less";
 
-import { IElements } from "../../interface/IElements";
+import { IEditorDomMap } from "../../interface/IEditorDomMap";
 import { IOptions } from "../../interface/IOptions";
 import { Editor } from "../../main";
+import { INode } from "../../interface/INode";
+import { IRenderOptions } from "../../interface/IRenderOptions";
+import { isNonEmptyArray } from "../../utils/array";
+import { Computer } from "./Computer";
+import { IRow } from "../../interface/IRow";
 
 /**
  * 渲染类
@@ -12,13 +18,24 @@ import { Editor } from "../../main";
  * 2. 负责渲染canvas
  */
 export class Render {
-  private editor: Editor;
-  private options: IOptions;
-  public elements: IElements;
+  public readonly editor: Editor;
+  public readonly options: IOptions;
+  private ctx: CanvasRenderingContext2D;
+  private nodes: INode[] = [
+    {
+      index: 0,
+      type: "text",
+      text: "",
+    },
+  ];
+  private rows: IRow[];
+  public editorDomMap: IEditorDomMap;
+  private computer: Computer;
 
   constructor(editor: Editor) {
     this.editor = editor;
     this.options = editor.options;
+    this.computer = new Computer(this);
     this.init(editor.options);
   }
 
@@ -29,21 +46,32 @@ export class Render {
     el = typeof el === "string" ? document.querySelector(el) : el;
     if (!el) throw Error();
 
-    this.elements = this.createEditorElements();
-    el.appendChild(this.elements.container);
+    const { container, header, body, footer, canvasContainer, contentCtx } =
+      this.createEditorDom();
+    this.editorDomMap = {
+      container,
+      header,
+      body,
+      footer,
+      canvasContainer,
+    };
+    this.ctx = contentCtx;
+    el.appendChild(this.editorDomMap.container);
   }
-  private createEditorElements() {
+
+  private createEditorDom() {
     const container = document.createElement("div");
     const header = this.createEditorHeader();
     const body = this.createEditorBody();
     const footer = this.createEditorFooter();
-    const { canvasContainer } = this.createCanvas();
+    const { canvasContainer, contentCtx } = this.createCanvas();
 
     body.appendChild(canvasContainer);
     container.appendChild(header);
     container.appendChild(body);
     container.appendChild(footer);
 
+    container.classList.add(this.options.classPrefix);
     container.classList.add(`${this.options.classPrefix}-container`);
     return {
       container,
@@ -51,6 +79,7 @@ export class Render {
       body,
       footer,
       canvasContainer,
+      contentCtx,
     };
   }
 
@@ -98,5 +127,71 @@ export class Render {
       contentCanvasEl,
       contentCtx,
     };
+  }
+
+  public getContentWidth() {
+    return (
+      this.options.width - this.options.paddings[1] - this.options.paddings[3]
+    );
+  }
+
+  public getX() {
+    return this.options.paddings[0];
+  }
+
+  public getY() {
+    return this.options.paddings[3];
+  }
+
+  public getRows() {
+    return this.rows;
+  }
+
+  public getNodes() {
+    return this.nodes;
+  }
+
+  private clearCanvas() {
+    this.ctx.clearRect(0, 0, this.options.width, this.options.height);
+  }
+
+  public render(renderOptions?: IRenderOptions) {
+    this.clearCanvas();
+    this.rows = this.computer.compute(this.nodes);
+    this.renderRows(this.rows);
+    this.editor.interaction.cursor.showCursor();
+    console.log(this.rows);
+  }
+
+  private renderRows(rows: IRow[]) {
+    let x = this.options.paddings[3];
+    let y = this.options.paddings[0];
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      for (let j = 0; j < row.nodes.length; j++) {
+        const node = row.nodes[j];
+        this.renderNode(node, x, y);
+        x += node.metrics.width;
+      }
+      x = this.options.paddings[3];
+      y += row.height;
+    }
+  }
+
+  private renderNode(node: INode, x: number, y: number) {
+    switch (node.type) {
+      case "text":
+        this.renderTextNode(node, x, y);
+        break;
+    }
+  }
+
+  private renderTextNode(node: INode, x: number, y: number) {
+    const { ctx } = this;
+    const { fontBoundingBoxAscent } = node.metrics;
+    ctx.save();
+    ctx.font = `${this.options.defaultFontSize}px`;
+    ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
+    ctx.restore();
   }
 }

@@ -3,4 +3,8 @@ export interface IOptions {
   classPrefix?: string;
   width?: number;
   height?: number;
+  paddings?: number[];
+  rowSpacing?: number;
+  textSpacing?: number;
+  defaultFontSize?: number;
 }

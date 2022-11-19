@@ -1,7 +1,6 @@
-import babel from "rollup-plugin-babel";
-import typescript from "@rollup/plugin-commonjs";
+import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-typescript";
+import typescript from "@rollup/plugin-typescript";
 import postcss from "rollup-plugin-postcss";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
@@ -17,9 +16,6 @@ export default {
     resolve(),
     commonjs(),
     typescript(),
-    babel({
-      exclude: "**/node_modules/**",
-    }),
     postcss(),
     livereload(),
     serve({

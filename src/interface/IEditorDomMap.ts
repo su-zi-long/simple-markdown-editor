@@ -1,4 +1,4 @@
-export interface IElements {
+export interface IEditorDomMap {
   container: Element;
   header: Element;
   body: Element;
