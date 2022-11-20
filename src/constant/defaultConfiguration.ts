@@ -8,5 +8,6 @@ export const defaultConfiguration: IOptions = {
   // paddings: [100, 100, 100, 100],
   rowSpacing: 8,
   textSpacing: 1,
-  defaultFontSize: 16,
+  defaultFontSize: 20,
+  defaultFontFamily: 'Arial'
 };

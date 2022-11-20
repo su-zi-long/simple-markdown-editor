@@ -7,4 +7,5 @@ export interface IOptions {
   rowSpacing?: number;
   textSpacing?: number;
   defaultFontSize?: number;
+  defaultFontFamily?: string;
 }

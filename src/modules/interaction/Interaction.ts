@@ -73,6 +73,13 @@ export class Interaction {
     nodes.splice(index + 1, 0, ...insertNodes);
   }
 
+  public deleteNodeByIndexes() {
+    const nodes = this.editor.render.getNodes();
+    const index = this.cursor.getIndex();
+    if (index === 0) return false;
+    return nodes.splice(index, 1);
+  }
+
   public render() {
     this.editor.render.render();
   }

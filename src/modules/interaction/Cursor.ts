@@ -9,7 +9,7 @@ import { Interaction } from "./Interaction";
 
 export class Cursor {
   private interaction: Interaction;
-  private indexes = [-1];
+  private indexes = [0];
   private cursorContainer: HTMLElement;
   private cursorAgent: HTMLInputElement;
   private compositing = false;
@@ -64,7 +64,7 @@ export class Cursor {
 
   private createCursorContainer() {
     const cursorContainer = document.createElement("div");
-    cursorContainer.classList.add("cursor-container");
+    cursorContainer.classList.add("cursor-container", "cursor-animation");
     return cursorContainer;
   }
 
@@ -94,7 +94,7 @@ export class Cursor {
     this.getFocus();
 
     const rows = this.interaction.editor.render.getRows();
-    const index = this.indexes[0] || 0;
+    const index = this.indexes[0];
     const { render } = this.interaction.editor;
     let y = render.getY();
     let x = render.getX();
@@ -152,7 +152,13 @@ export class Cursor {
     this.interaction.render();
   }
 
-  private backspace() {}
+  private backspace() {
+    const result = this.interaction.deleteNodeByIndexes();
+    if (!result) return;
+    this.moveCursor(-1);
+    this.interaction.render();
+  }
+
   private arrowLeft() {}
   private arrowUp() {}
   private arrowRight() {}

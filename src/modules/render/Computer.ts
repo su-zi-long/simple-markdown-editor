@@ -68,16 +68,22 @@ export class Computer {
     return rows;
   }
 
+  public getNodeFont(node: INode) {
+    const { defaultFontSize, defaultFontFamily } = this.render.options
+    const font = `${defaultFontSize}px ${defaultFontFamily}`;
+    return font
+  }
+
   public getNodeMetrics(node: INode) {
     const { ctx } = this;
     const { defaultFontSize } = this.render.editor.options;
     ctx.save();
-    ctx.font = `${defaultFontSize}px`;
+    ctx.font = this.getNodeFont(node);
     const textMetrics = ctx.measureText(node.text || '');
     ctx.restore();
     return {
       width: textMetrics.width,
-      height: +defaultFontSize,
+      height: textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent,
       fontBoundingBoxAscent: textMetrics.fontBoundingBoxAscent,
       fontBoundingBoxDescent: textMetrics.fontBoundingBoxDescent,
     };

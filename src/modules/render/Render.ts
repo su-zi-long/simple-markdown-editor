@@ -191,7 +191,7 @@ export class Render {
     const { ctx } = this;
     const { fontBoundingBoxAscent } = node.metrics;
     ctx.save();
-    ctx.font = `${this.options.defaultFontSize}px`;
+    ctx.font = this.computer.getNodeFont(node);
     ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
     ctx.restore();
   }
