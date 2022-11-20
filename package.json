@@ -4,8 +4,7 @@
   "description": "An easy-to-use markdown editor",
   "main": "dist/simple-markdown-editor.js",
   "scripts": {
-    "dev": "rollup --config script/rollup.config.dev.js -w",
-    "build": "rollup --config script/rollup.config.pro.js",
+    "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,19 +18,7 @@
   },
   "homepage": "https://github.com/simple-markdown-editor/simple-markdown-editor#readme",
   "devDependencies": {
-    "@babel/core": "^7.20.2",
-    "@babel/preset-env": "^7.20.2",
-    "@rollup/plugin-commonjs": "^23.0.2",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-typescript": "^9.0.2",
-    "postcss": "^8.4.19",
-    "rollup": "^2.45.2",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-serve": "^2.0.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "tslib": "^2.4.1",
-    "typescript": "^4.8.4"
+    "less": "^4.1.3",
+    "vite": "^2.4.2"
   }
 }

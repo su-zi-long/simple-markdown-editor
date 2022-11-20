@@ -17,9 +17,9 @@
 <body>
   <div id="editor"></div>
 
-  <script src="./dist/simple-markdown-editor.js"></script>
-  <script>
-    const editor = new SimpleMarkdownEditor.Editor({
+  <script type="module">
+    import { Editor } from './src/main.ts'
+    const editor = new Editor({
       el: '#editor'
     });
   </script>
