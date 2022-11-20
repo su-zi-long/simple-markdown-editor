@@ -11,6 +11,7 @@ import { IRenderOptions } from "../../interface/IRenderOptions";
 import { isNonEmptyArray } from "../../utils/array";
 import { Computer } from "./Computer";
 import { IRow } from "../../interface/IRow";
+import { NodeType } from "../../enum/nodeType";
 
 /**
  * 渲染类
@@ -24,7 +25,7 @@ export class Render {
   private nodes: INode[] = [
     {
       index: 0,
-      type: "text",
+      type: NodeType.Text,
       text: "",
     },
   ];
@@ -171,7 +172,7 @@ export class Render {
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
         this.renderNode(node, x, y);
-        x += node.metrics.width;
+        x += node?.metrics?.width || 0;
       }
       x = this.options.paddings[3];
       y += row.height;
@@ -180,7 +181,7 @@ export class Render {
 
   private renderNode(node: INode, x: number, y: number) {
     switch (node.type) {
-      case "text":
+      case NodeType.Text:
         this.renderTextNode(node, x, y);
         break;
     }

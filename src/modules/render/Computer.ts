@@ -1,3 +1,4 @@
+import { NodeType } from "../../enum/nodeType";
 import { INode } from "../../interface/INode";
 import { IRow } from "../../interface/IRow";
 import { Render } from "./Render";
@@ -25,22 +26,32 @@ export class Computer {
     let remainingWidth = contentWidth;
     let x = options.paddings[3];
     let y = options.paddings[0];
+    
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
       node.index = i;
       let width = 0;
       let height = 0;
+      let isLineFeed = false;
       switch (node.type) {
-        case "text": {
+        case NodeType.Text: {
           node.metrics = this.getNodeMetrics(node);
           ({ width, height } = node.metrics);
+          break;
+        }
+        case NodeType.LineFeed: {
+          node.metrics = this.getNodeMetrics(node);
+          ({ width, height } = node.metrics);
+          isLineFeed = true;
           break;
         }
         default:
           break;
       }
 
-      if (width > remainingWidth) {
+      if (width > remainingWidth) isLineFeed = true;
+
+      if (isLineFeed) {
         rows.push({
           nodes: [node],
           height,
@@ -62,7 +73,7 @@ export class Computer {
     const { defaultFontSize } = this.render.editor.options;
     ctx.save();
     ctx.font = `${defaultFontSize}px`;
-    const textMetrics = ctx.measureText(node.text);
+    const textMetrics = ctx.measureText(node.text || '');
     ctx.restore();
     return {
       width: textMetrics.width,

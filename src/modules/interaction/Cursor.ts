@@ -1,11 +1,15 @@
 import "../../asset/css/cursor.less";
-import { generateTextNode } from "../generator/generator";
+import { KeyboardEvnet } from "../../enum/keyboardEvnet";
+import {
+  generateLineFeedNode,
+  generateTextNodes,
+} from "../generator/nodeGenerator";
 
 import { Interaction } from "./Interaction";
 
 export class Cursor {
   private interaction: Interaction;
-  private indexes = [0];
+  private indexes = [-1];
   private cursorContainer: HTMLElement;
   private cursorAgent: HTMLInputElement;
   private compositing = false;
@@ -27,6 +31,28 @@ export class Cursor {
       setTimeout(() => {
         this.input(event);
       });
+    });
+    this.cursorAgent.addEventListener("keydown", (event: KeyboardEvent) => {
+      switch (event.key) {
+        case KeyboardEvnet.Enter:
+          this.enter();
+          break;
+        case KeyboardEvnet.Backspace:
+          this.backspace();
+          break;
+        case KeyboardEvnet.ArrowLeft:
+          this.arrowLeft();
+          break;
+        case KeyboardEvnet.ArrowUp:
+          this.arrowUp();
+          break;
+        case KeyboardEvnet.ArrowRight:
+          this.arrowRight();
+          break;
+        case KeyboardEvnet.ArrowDown:
+          this.arrowDown();
+          break;
+      }
     });
     this.cursorAgent.addEventListener("compositionstart", () => {
       this.compositing = true;
@@ -51,11 +77,15 @@ export class Cursor {
 
   public setIndexes(indexes: number[]) {
     this.indexes = indexes;
+    console.log("当前光标位置", this.indexes);
   }
 
   public getIndexes() {
-    if (this.indexes.length === 0) return [0];
     return this.indexes;
+  }
+
+  public getIndex(level = 0) {
+    return this.indexes[level];
   }
 
   public showCursor() {
@@ -78,7 +108,7 @@ export class Cursor {
           cursorContainer.style.height = `${row.height}px`;
           return;
         }
-        x += node.metrics.width;
+        x += node?.metrics?.width || 0;
       }
       y += row.height;
       x = render.getX();
@@ -104,7 +134,7 @@ export class Cursor {
   private input(event: InputEvent) {
     const { data } = event;
     if (this.compositing || !data) return;
-    const textNodes = generateTextNode(data);
+    const textNodes = generateTextNodes(data);
     this.interaction.insertNodesByIndexes(textNodes);
     this.moveCursor(textNodes.length);
     this.interaction.render();
@@ -114,4 +144,17 @@ export class Cursor {
     const { indexes } = this;
     indexes[indexes.length - 1] += distance;
   }
+
+  private enter() {
+    const lineFeedNode = generateLineFeedNode();
+    this.interaction.insertNodesByIndexes(lineFeedNode);
+    this.moveCursor(1);
+    this.interaction.render();
+  }
+
+  private backspace() {}
+  private arrowLeft() {}
+  private arrowUp() {}
+  private arrowRight() {}
+  private arrowDown() {}
 }

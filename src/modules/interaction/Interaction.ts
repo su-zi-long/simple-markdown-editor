@@ -24,51 +24,53 @@ export class Interaction {
 
   private mousedown(event: MouseEvent) {
     this.editor.event.emit("mousedown", event);
-    const indexes = this.getCursorIndexseByXY(
+    const index = this.getCursorIndexByXY(
       this.editor.render.getRows(),
       event.offsetX,
       event.offsetY
     );
-    this.cursor.setIndexes(indexes || [0]);
+    if (!~index) return;
+    this.cursor.setIndexes([index]);
     this.cursor.showCursor();
   }
 
-  private getCursorIndexseByXY(rows: IRow[], x: number, y: number) {
-    const indexes = [];
-    let row;
+  private getRowIndexByXy(rows: IRow[], x: number, y: number): number {
     let startHeight = this.editor.render.getY();
     for (let i = 0; i < rows.length; i++) {
       const tempRow = rows[i];
       if (startHeight <= y && y <= tempRow.height + startHeight) {
-        row = tempRow;
-        break;
+        return i;
       }
       startHeight += tempRow.height;
     }
 
-    if (!row) {
-      return null;
-    }
+    return rows.length - 1;
+  }
+
+  private getCursorIndexByXY(rows: IRow[], x: number, y: number) {
+    const row = rows[this.getRowIndexByXy(rows, x, y)];
+    if (!row) return -1;
+    const { nodes } = row;
 
     let startWidth = this.editor.render.getX();
-    for (let i = 0; i < row.nodes.length; i++) {
-      const tempNode = row.nodes[i];
+    for (let i = 0; i < nodes.length; i++) {
+      const tempNode = nodes[i];
       const { width: tempWidth } = tempNode.metrics;
       if (startWidth <= x && x <= tempWidth + startWidth) {
-        indexes.push(tempNode.index);
-        break;
+        return tempNode.index;
       }
       startWidth += tempWidth;
     }
 
-    return indexes;
+    return nodes[nodes.length - 1].index;
   }
 
-  public insertNodesByIndexes(insertNodes: INode[]) {
+  public insertNodesByIndexes(insertNodes: INode[] | INode) {
+    insertNodes = Array.isArray(insertNodes) ? insertNodes : [insertNodes];
     const nodes = this.editor.render.getNodes();
     const indexes = this.cursor.getIndexes();
     const index = indexes[0];
-    nodes.splice(index, 0, ...insertNodes);
+    nodes.splice(index + 1, 0, ...insertNodes);
   }
 
   public render() {
