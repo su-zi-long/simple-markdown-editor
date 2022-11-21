@@ -1,3 +1,4 @@
+import { NodeMark } from "../enum/NodeMark";
 import { NodeType } from "../enum/nodeType";
 import { IMetrics } from "./IMetrics";
 
@@ -7,4 +8,5 @@ export interface INode {
   nodes?: INode[];
   text?: string; // 元素的文本
   metrics?: IMetrics;
+  marks?: NodeMark[];
 }
