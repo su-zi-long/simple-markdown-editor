@@ -22,6 +22,7 @@ export class Render {
   public readonly editor: Editor;
   public readonly options: IOptions;
   private ctx: CanvasRenderingContext2D;
+  private rangeCtx: CanvasRenderingContext2D;
   private nodes: INode[] = [
     {
       index: 0,
@@ -47,8 +48,15 @@ export class Render {
     el = typeof el === "string" ? document.querySelector(el) : el;
     if (!el) throw Error();
 
-    const { container, header, body, footer, canvasContainer, contentCtx } =
-      this.createEditorDom();
+    const {
+      container,
+      header,
+      body,
+      footer,
+      canvasContainer,
+      contentCtx,
+      rangeCtx,
+    } = this.createEditorDom();
     this.editorDomMap = {
       container,
       header,
@@ -57,6 +65,7 @@ export class Render {
       canvasContainer,
     };
     this.ctx = contentCtx;
+    this.rangeCtx = rangeCtx;
     el.appendChild(this.editorDomMap.container);
   }
 
@@ -65,7 +74,7 @@ export class Render {
     const header = this.createEditorHeader();
     const body = this.createEditorBody();
     const footer = this.createEditorFooter();
-    const { canvasContainer, contentCtx } = this.createCanvas();
+    const { canvasContainer, contentCtx, rangeCtx } = this.createCanvas();
 
     body.appendChild(canvasContainer);
     container.appendChild(header);
@@ -81,6 +90,7 @@ export class Render {
       footer,
       canvasContainer,
       contentCtx,
+      rangeCtx,
     };
   }
 
@@ -103,6 +113,7 @@ export class Render {
   }
 
   private createCanvas() {
+    const dpr = window.devicePixelRatio;
     const { width, height } = this.options;
     const canvasContainer = document.createElement("div");
     canvasContainer.style.width = `${width}px`;
@@ -114,19 +125,28 @@ export class Render {
     const contentCtx = contentCanvasEl.getContext(
       "2d"
     ) as CanvasRenderingContext2D;
-    const dpr = window.devicePixelRatio;
-    contentCanvasEl.width = width;
-    contentCanvasEl.height = height;
-    contentCanvasEl.style.cssText = `display:block;width:${width}px;height:${height}px;background:#fff;box-shadow:0 1px 5px #ddd;`;
+    contentCanvasEl.classList.add("content-canvas");
+    contentCanvasEl.style.cssText = `display:block;width:${width}px;height:${height}px;`;
     contentCanvasEl.width = width * dpr;
     contentCanvasEl.height = height * dpr;
     contentCtx.scale(dpr, dpr);
-
     canvasContainer.appendChild(contentCanvasEl);
+
+    const rangeCanvasEl = document.createElement("canvas");
+    const rangeCtx = rangeCanvasEl.getContext("2d") as CanvasRenderingContext2D;
+    rangeCanvasEl.classList.add("range-canvas");
+    rangeCanvasEl.style.cssText = `display:block;width:${width}px;height:${height}px;`;
+    rangeCanvasEl.width = width * dpr;
+    rangeCanvasEl.height = height * dpr;
+    rangeCtx.scale(dpr, dpr);
+    canvasContainer.appendChild(rangeCanvasEl);
+
     return {
       canvasContainer,
       contentCanvasEl,
       contentCtx,
+      rangeCanvasEl,
+      rangeCtx,
     };
   }
 
@@ -152,21 +172,67 @@ export class Render {
     return this.nodes;
   }
 
-  private clearCanvas() {
-    this.ctx.clearRect(0, 0, this.options.width, this.options.height);
+  private clearCanvas(ctx: CanvasRenderingContext2D) {
+    ctx.clearRect(0, 0, this.options.width, this.options.height);
   }
 
   public render(renderOptions?: IRenderOptions) {
-    this.clearCanvas();
+    this.clearCanvas(this.ctx);
     this.rows = this.computer.compute(this.nodes);
     this.renderRows(this.rows);
     this.editor.interaction.cursor.showCursor();
-    console.log(this.rows);
+    // console.log(this.rows);
+  }
+
+  public renderRange() {
+    const { range } = this.editor.interaction;
+    if (!range.hasRange()) return;
+    this.clearCanvas(this.rangeCtx);
+    const { rows } = this;
+    const { startIndexes, endIndexes } =
+      this.editor.interaction.range.getIndexes();
+    const startIndex = startIndexes[0];
+    const endIndex = endIndexes[0];
+    let x = this.getX();
+    let y = this.getY();
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      for (let j = 0; j < row.nodes.length; j++) {
+        const node = row.nodes[j];
+        if (node.index > startIndex && node.index <= endIndex) {
+          this.renderRangeRect(
+            this.rangeCtx,
+            x,
+            y,
+            node.metrics.width,
+            node.metrics.height
+          );
+        }
+        x += node?.metrics?.width || 0;
+      }
+      x = this.getX();
+      y += row.height;
+    }
+  }
+
+  public renderRangeRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = "#AECBFA";
+    ctx.fillRect(x, y, width, height);
+    ctx.restore();
   }
 
   private renderRows(rows: IRow[]) {
-    let x = this.options.paddings[3];
-    let y = this.options.paddings[0];
+    let x = this.getX();
+    let y = this.getY();
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
@@ -174,7 +240,7 @@ export class Render {
         this.renderNode(node, x, y);
         x += node?.metrics?.width || 0;
       }
-      x = this.options.paddings[3];
+      x = this.getX();
       y += row.height;
     }
   }

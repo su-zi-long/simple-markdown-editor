@@ -2,6 +2,7 @@ import { INode } from "../../interface/INode";
 import { IRow } from "../../interface/IRow";
 import { Editor } from "../../main";
 import { Cursor } from "./Cursor";
+import { Range } from "./Range";
 
 /**
  * 负责处理用户与编辑器的交互
@@ -9,10 +10,14 @@ import { Cursor } from "./Cursor";
 export class Interaction {
   public readonly editor: Editor;
   public readonly cursor: Cursor;
+  public readonly range: Range;
+  private isMousedown = false;
+
   constructor(editor: Editor) {
     this.editor = editor;
 
     this.cursor = new Cursor(this);
+    this.range = new Range(this);
     this.registerEvents();
   }
 
@@ -20,9 +25,12 @@ export class Interaction {
     const { canvasContainer } = this.editor.render.editorDomMap;
 
     canvasContainer.addEventListener("mousedown", this.mousedown.bind(this));
+    canvasContainer.addEventListener("mouseup", this.mouseup.bind(this));
+    canvasContainer.addEventListener("mousemove", this.mousemove.bind(this));
   }
 
   private mousedown(event: MouseEvent) {
+    this.isMousedown = true;
     this.editor.event.emit("mousedown", event);
     const index = this.getCursorIndexByXY(
       this.editor.render.getRows(),
@@ -32,6 +40,23 @@ export class Interaction {
     if (!~index) return;
     this.cursor.setIndexes([index]);
     this.cursor.showCursor();
+  }
+
+  private mouseup() {
+    this.isMousedown = false;
+  }
+
+  private mousemove(event: MouseEvent) {
+    if (!this.isMousedown) return;
+    const index = this.getCursorIndexByXY(
+      this.editor.render.getRows(),
+      event.offsetX,
+      event.offsetY
+    );
+    if (!~index) return;
+    this.range.setIndexes([this.cursor.getIndex()], [index]);
+    this.cursor.hideCursor();
+    this.renderRange();
   }
 
   private getRowIndexByXy(rows: IRow[], x: number, y: number): number {
@@ -82,5 +107,8 @@ export class Interaction {
 
   public render() {
     this.editor.render.render();
+  }
+  public renderRange() {
+    this.editor.render.renderRange();
   }
 }

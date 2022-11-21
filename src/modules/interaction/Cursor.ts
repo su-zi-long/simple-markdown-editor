@@ -33,7 +33,15 @@ export class Cursor {
       });
     });
     this.cursorAgent.addEventListener("keydown", (event: KeyboardEvent) => {
-      switch (event.key) {
+      let isPreventDefault = true;
+      const keys = [];
+      if (event.ctrlKey) keys.push("Ctrl");
+      if (event.shiftKey) keys.push("Shift");
+      if (event.altKey) keys.push("Alt");
+      keys.push(event.key);
+      const key = keys.join("+");
+
+      switch (key) {
         case KeyboardEvnet.Enter:
           this.enter();
           break;
@@ -52,7 +60,30 @@ export class Cursor {
         case KeyboardEvnet.ArrowDown:
           this.arrowDown();
           break;
+        case KeyboardEvnet.Heading1:
+          this.interaction.editor.openAPI.setHeading(1);
+          break;
+        case KeyboardEvnet.Heading2:
+          this.interaction.editor.openAPI.setHeading(2);
+          break;
+        case KeyboardEvnet.Heading3:
+          this.interaction.editor.openAPI.setHeading(3);
+          break;
+        case KeyboardEvnet.Heading4:
+          this.interaction.editor.openAPI.setHeading(4);
+          break;
+        case KeyboardEvnet.Heading5:
+          this.interaction.editor.openAPI.setHeading(5);
+          break;
+        case KeyboardEvnet.Heading6:
+          this.interaction.editor.openAPI.setHeading(6);
+          break;
+        default:
+          isPreventDefault = false;
+          break;
       }
+
+      if (isPreventDefault) event.preventDefault();
     });
     this.cursorAgent.addEventListener("compositionstart", () => {
       this.compositing = true;
