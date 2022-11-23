@@ -27,10 +27,12 @@ export class Interaction {
     canvasContainer.addEventListener("mousedown", this.mousedown.bind(this));
     canvasContainer.addEventListener("mouseup", this.mouseup.bind(this));
     canvasContainer.addEventListener("mousemove", this.mousemove.bind(this));
+    canvasContainer.addEventListener("mouseleave", () => {
+      this.isMousedown = false;
+    });
   }
 
   private mousedown(event: MouseEvent) {
-    this.isMousedown = true;
     this.editor.event.emit("mousedown", event);
     const index = this.getCursorIndexByXY(
       this.editor.render.getRows(),
@@ -40,6 +42,8 @@ export class Interaction {
     if (!~index) return;
     this.cursor.setIndexes([index]);
     this.cursor.showCursor();
+    this.range.clearRange();
+    this.isMousedown = true;
   }
 
   private mouseup() {
@@ -53,9 +57,9 @@ export class Interaction {
       event.offsetX,
       event.offsetY
     );
-    if (!~index) return;
-    this.range.setIndexes([this.cursor.getIndex()], [index]);
-    this.cursor.hideCursor();
+    const cursorIndex = this.cursor.getIndex();
+    if (!~index || cursorIndex === index) return;
+    this.range.setIndexes([cursorIndex], [index]);
     this.renderRange();
   }
 
@@ -77,14 +81,16 @@ export class Interaction {
     if (!row) return -1;
     const { nodes } = row;
 
-    let startWidth = this.editor.render.getX();
     for (let i = 0; i < nodes.length; i++) {
-      const tempNode = nodes[i];
-      const { width: tempWidth } = tempNode.metrics;
-      if (startWidth <= x && x <= tempWidth + startWidth) {
-        return tempNode.index;
+      const node = nodes[i];
+      const {
+        metrics: { width },
+        coordinate,
+      } = node;
+      if (coordinate.x <= x && x <= coordinate.x + width) {
+        if (x < coordinate.x + width / 2) return node.index - 1;
+        return node.index;
       }
-      startWidth += tempWidth;
     }
 
     return nodes[nodes.length - 1].index;
@@ -108,6 +114,7 @@ export class Interaction {
   public render() {
     this.editor.render.render();
   }
+
   public renderRange() {
     this.editor.render.renderRange();
   }

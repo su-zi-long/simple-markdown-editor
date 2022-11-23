@@ -8,4 +8,5 @@ export interface IOptions {
   textSpacing?: number;
   defaultFontSize?: number;
   defaultFontFamily?: string;
+  blockquotePaddingLeft?: number;
 }

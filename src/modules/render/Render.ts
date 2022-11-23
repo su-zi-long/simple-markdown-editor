@@ -12,6 +12,7 @@ import { isNonEmptyArray } from "../../utils/array";
 import { Computer } from "./Computer";
 import { IRow } from "../../interface/IRow";
 import { NodeType } from "../../enum/nodeType";
+import { NodeMark } from "../../enum/NodeMark";
 
 /**
  * 渲染类
@@ -28,6 +29,15 @@ export class Render {
       index: 0,
       type: NodeType.Text,
       text: "",
+      metrics: {
+        width: 0,
+        height: 0,
+      },
+      coordinate: {
+        x: 0,
+        y: 0,
+      },
+      marks: new Set(),
     },
   ];
   private rows: IRow[];
@@ -181,7 +191,7 @@ export class Render {
     this.rows = this.computer.compute(this.nodes);
     this.renderRows(this.rows);
     this.editor.interaction.cursor.showCursor();
-    // console.log(this.rows);
+    console.log(this.rows);
   }
 
   public renderRange() {
@@ -200,13 +210,16 @@ export class Render {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
+        if (node.marks.has(NodeMark.Blockquote) && j === 0) {
+          x += this.options.blockquotePaddingLeft;
+        }
         if (node.index > startIndex && node.index <= endIndex) {
           this.renderRangeRect(
             this.rangeCtx,
             x,
             y,
             node.metrics.width,
-            node.metrics.height
+            row.height
           );
         }
         x += node?.metrics?.width || 0;
@@ -214,6 +227,13 @@ export class Render {
       x = this.getX();
       y += row.height;
     }
+
+    this.editor.interaction.cursor.hideCursor();
+    this.editor.interaction.cursor.getFocus();
+  }
+
+  public clearRange() {
+    this.clearCanvas(this.rangeCtx);
   }
 
   public renderRangeRect(
@@ -230,6 +250,19 @@ export class Render {
     ctx.restore();
   }
 
+  public renderBlockquoteRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    ctx.save();
+    ctx.fillStyle = "#000";
+    ctx.fillRect(x, y, width, height);
+    ctx.restore();
+  }
+
   private renderRows(rows: IRow[]) {
     let x = this.getX();
     let y = this.getY();
@@ -237,7 +270,11 @@ export class Render {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
-        this.renderNode(node, x, y);
+        if (node.marks.has(NodeMark.Blockquote) && j === 0) {
+          this.renderBlockquoteRect(this.ctx, x, y, 3, row.height);
+          x += this.options.blockquotePaddingLeft;
+        }
+        this.renderNode(node, x, y + row.rowSpacing / 2);
         x += node?.metrics?.width || 0;
       }
       x = this.getX();
@@ -246,6 +283,10 @@ export class Render {
   }
 
   private renderNode(node: INode, x: number, y: number) {
+    node.coordinate = {
+      x,
+      y,
+    };
     switch (node.type) {
       case NodeType.Text:
         this.renderTextNode(node, x, y);

@@ -1,5 +1,7 @@
 import "../../asset/css/cursor.less";
+import { inputFollowMarks } from "../../constant/inputFollowMarks";
 import { KeyboardEvnet } from "../../enum/keyboardEvnet";
+import { intersection } from "../../utils/intersection";
 import {
   generateLineFeedNode,
   generateTextNodes,
@@ -10,17 +12,20 @@ import { Interaction } from "./Interaction";
 export class Cursor {
   private interaction: Interaction;
   private indexes = [0];
-  private cursorContainer: HTMLElement;
+  private cursor: HTMLElement;
   private cursorAgent: HTMLInputElement;
   private compositing = false;
+  private isFocus = false;
   constructor(interaction: Interaction) {
     this.interaction = interaction;
 
-    this.cursorContainer = this.createCursorContainer();
+    this.cursor = this.createCursor();
     this.cursorAgent = this.createCursorAgent();
-    this.cursorContainer.appendChild(this.cursorAgent);
     this.interaction.editor.render.editorDomMap.canvasContainer.appendChild(
-      this.cursorContainer
+      this.cursor
+    );
+    this.interaction.editor.render.editorDomMap.canvasContainer.appendChild(
+      this.cursorAgent
     );
 
     this.registerEvent();
@@ -32,71 +37,25 @@ export class Cursor {
         this.input(event);
       });
     });
-    this.cursorAgent.addEventListener("keydown", (event: KeyboardEvent) => {
-      let isPreventDefault = true;
-      const keys = [];
-      if (event.ctrlKey) keys.push("Ctrl");
-      if (event.shiftKey) keys.push("Shift");
-      if (event.altKey) keys.push("Alt");
-      keys.push(event.key);
-      const key = keys.join("+");
-
-      switch (key) {
-        case KeyboardEvnet.Enter:
-          this.enter();
-          break;
-        case KeyboardEvnet.Backspace:
-          this.backspace();
-          break;
-        case KeyboardEvnet.ArrowLeft:
-          this.arrowLeft();
-          break;
-        case KeyboardEvnet.ArrowUp:
-          this.arrowUp();
-          break;
-        case KeyboardEvnet.ArrowRight:
-          this.arrowRight();
-          break;
-        case KeyboardEvnet.ArrowDown:
-          this.arrowDown();
-          break;
-        case KeyboardEvnet.Heading1:
-          this.interaction.editor.openAPI.setHeading(1);
-          break;
-        case KeyboardEvnet.Heading2:
-          this.interaction.editor.openAPI.setHeading(2);
-          break;
-        case KeyboardEvnet.Heading3:
-          this.interaction.editor.openAPI.setHeading(3);
-          break;
-        case KeyboardEvnet.Heading4:
-          this.interaction.editor.openAPI.setHeading(4);
-          break;
-        case KeyboardEvnet.Heading5:
-          this.interaction.editor.openAPI.setHeading(5);
-          break;
-        case KeyboardEvnet.Heading6:
-          this.interaction.editor.openAPI.setHeading(6);
-          break;
-        default:
-          isPreventDefault = false;
-          break;
-      }
-
-      if (isPreventDefault) event.preventDefault();
-    });
+    this.cursorAgent.addEventListener("keydown", this.keydown.bind(this));
     this.cursorAgent.addEventListener("compositionstart", () => {
       this.compositing = true;
     });
     this.cursorAgent.addEventListener("compositionend", () => {
       this.compositing = false;
     });
+    this.cursorAgent.addEventListener("focus", () => {
+      this.isFocus = true;
+    });
+    this.cursorAgent.addEventListener("blur", () => {
+      this.isFocus = false;
+    });
   }
 
-  private createCursorContainer() {
-    const cursorContainer = document.createElement("div");
-    cursorContainer.classList.add("cursor-container", "cursor-animation");
-    return cursorContainer;
+  private createCursor() {
+    const cursor = document.createElement("div");
+    cursor.classList.add("cursor", "cursor-animation");
+    return cursor;
   }
 
   private createCursorAgent() {
@@ -106,74 +65,84 @@ export class Cursor {
     return cursorAgent;
   }
 
-  public setIndexes(indexes: number[]) {
-    this.indexes = indexes;
-    console.log("当前光标位置", this.indexes);
-  }
+  private keydown(event: KeyboardEvent) {
+    let isPreventDefault = true;
+    const keys = [];
+    if (event.ctrlKey) keys.push("CTRL");
+    if (event.shiftKey) keys.push("SHIFT");
+    if (event.altKey) keys.push("ALT");
+    keys.push(event.key);
+    const key = keys.join("+").toUpperCase();
+    // console.log("key", key);
 
-  public getIndexes() {
-    return this.indexes;
-  }
-
-  public getIndex(level = 0) {
-    return this.indexes[level];
-  }
-
-  public showCursor() {
-    const { cursorContainer } = this;
-    cursorContainer.style.display = "block";
-    this.getFocus();
-
-    const rows = this.interaction.editor.render.getRows();
-    const index = this.indexes[0];
-    const { render } = this.interaction.editor;
-    let y = render.getY();
-    let x = render.getX();
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      for (let j = 0; j < row.nodes.length; j++) {
-        const node = row.nodes[j];
-        if (node.index === index) {
-          cursorContainer.style.left = `${x + node.metrics.width}px`;
-          cursorContainer.style.top = `${y}px`;
-          cursorContainer.style.height = `${row.height}px`;
-          return;
-        }
-        x += node?.metrics?.width || 0;
-      }
-      y += row.height;
-      x = render.getX();
+    switch (key) {
+      case KeyboardEvnet.Enter:
+        this.enter();
+        break;
+      case KeyboardEvnet.Backspace:
+        this.backspace();
+        break;
+      case KeyboardEvnet.ArrowLeft:
+        this.arrowLeft();
+        break;
+      case KeyboardEvnet.ArrowUp:
+        this.arrowUp();
+        break;
+      case KeyboardEvnet.ArrowRight:
+        this.arrowRight();
+        break;
+      case KeyboardEvnet.ArrowDown:
+        this.arrowDown();
+        break;
+      case KeyboardEvnet.Heading1:
+        this.interaction.editor.openAPI.toggleHeading(1);
+        break;
+      case KeyboardEvnet.Heading2:
+        this.interaction.editor.openAPI.toggleHeading(2);
+        break;
+      case KeyboardEvnet.Heading3:
+        this.interaction.editor.openAPI.toggleHeading(3);
+        break;
+      case KeyboardEvnet.Heading4:
+        this.interaction.editor.openAPI.toggleHeading(4);
+        break;
+      case KeyboardEvnet.Heading5:
+        this.interaction.editor.openAPI.toggleHeading(5);
+        break;
+      case KeyboardEvnet.Heading6:
+        this.interaction.editor.openAPI.toggleHeading(6);
+        break;
+      case KeyboardEvnet.Bold:
+        this.interaction.editor.openAPI.toggleBold();
+        break;
+      case KeyboardEvnet.Italic:
+        this.interaction.editor.openAPI.toggleItalic();
+        break;
+      case KeyboardEvnet.Blockquote:
+        this.interaction.editor.openAPI.toggleBlockquote();
+        break;
+      default:
+        isPreventDefault = false;
+        break;
     }
-  }
 
-  public hideCursor() {
-    this.cursorContainer.style.display = "none";
-    this.loseFocus();
-  }
-
-  private getFocus() {
-    setTimeout(() => {
-      this.cursorAgent.focus();
-      this.cursorAgent.setSelectionRange(0, 0);
-    });
-  }
-
-  private loseFocus() {
-    this.cursorAgent.blur();
+    if (isPreventDefault) event.preventDefault();
   }
 
   private input(event: InputEvent) {
     const { data } = event;
     if (this.compositing || !data) return;
     const textNodes = generateTextNodes(data);
+
+    const nodes = this.interaction.editor.render.getNodes();
+    const cursorNodeMarks = this.getCursorNode().marks;
+    textNodes.forEach(
+      (node) => (node.marks = intersection(cursorNodeMarks, inputFollowMarks))
+    );
+
     this.interaction.insertNodesByIndexes(textNodes);
     this.moveCursor(textNodes.length);
     this.interaction.render();
-  }
-
-  public moveCursor(distance: number) {
-    const { indexes } = this;
-    indexes[indexes.length - 1] += distance;
   }
 
   private enter() {
@@ -194,4 +163,63 @@ export class Cursor {
   private arrowUp() {}
   private arrowRight() {}
   private arrowDown() {}
+
+  public hasCursor() {
+    return this.indexes[0] > -1;
+  }
+
+  public setIndexes(indexes: number[]) {
+    this.indexes = indexes;
+    console.log("当前光标位置", this.indexes);
+  }
+
+  public getIndexes() {
+    return this.indexes;
+  }
+
+  public getIndex(level = 0) {
+    return this.indexes[level];
+  }
+
+  public getCursorNode() {
+    return this.interaction.editor.render.getNodes()[this.getIndex()];
+  }
+
+  public showCursor() {
+    const { cursor, cursorAgent } = this;
+    cursor.style.display = "block";
+    this.getFocus();
+    const cursorNode = this.getCursorNode();
+    if (!cursorNode) return;
+    const {
+      coordinate: { x, y },
+      metrics: { width, height },
+    } = cursorNode;
+
+    cursor.style.left = `${x + width}px`;
+    cursor.style.top = `${y}px`;
+    cursor.style.height = `${height}px`;
+    cursorAgent.style.left = `${x + width}px`;
+    cursorAgent.style.top = `${y}px`;
+  }
+
+  public hideCursor() {
+    this.cursor.style.display = "none";
+  }
+
+  public moveCursor(distance: number) {
+    const { indexes } = this;
+    indexes[indexes.length - 1] += distance;
+  }
+
+  public getFocus() {
+    setTimeout(() => {
+      this.cursorAgent.focus();
+      this.cursorAgent.setSelectionRange(0, 0);
+    });
+  }
+
+  public loseFocus() {
+    this.cursorAgent.blur();
+  }
 }

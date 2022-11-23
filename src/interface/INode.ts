@@ -7,6 +7,7 @@ export interface INode {
   type: NodeType;
   nodes?: INode[];
   text?: string; // 元素的文本
-  metrics?: IMetrics;
-  marks?: NodeMark[];
+  metrics: IMetrics;
+  coordinate: { x: number; y: number };
+  marks: Set<string>;
 }
