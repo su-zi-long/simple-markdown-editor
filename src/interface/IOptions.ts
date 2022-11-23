@@ -9,4 +9,5 @@ export interface IOptions {
   defaultFontSize?: number;
   defaultFontFamily?: string;
   blockquotePaddingLeft?: number;
+  blockquoteMargin?: number;
 }

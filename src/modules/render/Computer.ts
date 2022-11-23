@@ -16,6 +16,9 @@ export class Computer {
 
   private getRowSpacing(node: INode) {
     let rowSpacing = this.render.options.rowSpacing;
+
+    if (node.marks.has(NodeMark.Blockquote)) rowSpacing += 10;
+
     if (node.marks.has(NodeMark.Heading1)) {
       rowSpacing *= 3;
     } else if (node.marks.has(NodeMark.Heading2)) {

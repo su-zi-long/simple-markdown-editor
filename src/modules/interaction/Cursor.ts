@@ -1,6 +1,8 @@
 import "../../asset/css/cursor.less";
 import { inputFollowMarks } from "../../constant/inputFollowMarks";
 import { KeyboardEvnet } from "../../enum/keyboardEvnet";
+import { NodeMark } from "../../enum/NodeMark";
+import { NodeType } from "../../enum/nodeType";
 import { intersection } from "../../utils/intersection";
 import {
   generateLineFeedNode,
@@ -73,7 +75,7 @@ export class Cursor {
     if (event.altKey) keys.push("ALT");
     keys.push(event.key);
     const key = keys.join("+").toUpperCase();
-    // console.log("key", key);
+    console.log("key", key);
 
     switch (key) {
       case KeyboardEvnet.Enter:
@@ -145,13 +147,22 @@ export class Cursor {
     } else if (this.hasCursor()) {
       this.interaction.insertNodesByIndexes(textNodes);
     } else {
-      return
+      return;
     }
     this.interaction.render();
   }
 
   private enter() {
+    const cursorNode = this.getCursorNode();
     const lineFeedNode = generateLineFeedNode();
+    const row = this.interaction.getRowByNode(cursorNode);
+    if (cursorNode.marks.has(NodeMark.Blockquote)) {
+      if (cursorNode.type === NodeType.LineFeed) {
+        this.interaction.deleteNodeByIndexes();
+      } else {
+        lineFeedNode.marks.add(NodeMark.Blockquote);
+      }
+    }
     this.interaction.insertNodesByIndexes(lineFeedNode);
     this.interaction.render();
   }
@@ -162,14 +173,34 @@ export class Cursor {
       this.interaction.range.resetRange();
       this.interaction.render();
     } else if (this.interaction.cursor.hasCursor()) {
-      this.interaction.deleteNodeByIndexes();
+      if (this.interaction.cursor.getIndex() === 0) {
+        this.interaction.cursor.getCursorNode().marks = new Set();
+      } else {
+        this.interaction.deleteNodeByIndexes();
+      }
       this.interaction.render();
     }
   }
 
-  private arrowLeft() {}
+  private arrowLeft() {
+    if (this.getIndex() === 0) return;
+    this.moveCursor(-1);
+    this.showCursor();
+  }
+
   private arrowUp() {}
-  private arrowRight() {}
+
+  private arrowRight() {
+    if (
+      this.getIndex() ===
+      this.interaction.editor.render.getNodes().length - 1
+    ) {
+      return;
+    }
+    this.moveCursor(1);
+    this.showCursor();
+  }
+
   private arrowDown() {}
 
   public hasCursor() {

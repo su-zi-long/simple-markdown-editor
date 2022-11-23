@@ -111,7 +111,7 @@ export class Interaction {
 
   public replaceNodesByRange(replaceNode?: INode[], moveCursor = true) {
     if (!this.range.hasRange()) return false;
-    replaceNode = replaceNode || []
+    replaceNode = replaceNode || [];
     const nodes = this.editor.render.getNodes();
     const { startIndexes, endIndexes } = this.range.getIndexes();
     const startIndex = startIndexes[0] + 1;
@@ -133,6 +133,17 @@ export class Interaction {
       this.cursor.moveCursor(-1);
     }
     return result;
+  }
+
+  public getRowByNode(node: INode) {
+    const rows = this.editor.render.getRows();
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      for (let j = 0; j < row.nodes.length; j++) {
+        const tempNode = row.nodes[j];
+        if (tempNode === node) return row;
+      }
+    }
   }
 
   public render(renderOptions?: IRenderOptions) {

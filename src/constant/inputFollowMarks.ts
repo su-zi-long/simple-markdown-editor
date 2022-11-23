@@ -7,4 +7,5 @@ export const inputFollowMarks: Set<string> = new Set([
   NodeMark.Heading4,
   NodeMark.Heading5,
   NodeMark.Heading6,
+  NodeMark.Blockquote,
 ]);

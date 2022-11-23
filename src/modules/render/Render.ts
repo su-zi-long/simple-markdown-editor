@@ -248,6 +248,25 @@ export class Render {
     ctx.restore();
   }
 
+  private renderRect(
+    ctx: CanvasRenderingContext2D,
+    params: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      globalAlpha?: number;
+      fillStyle?: string;
+    }
+  ) {
+    const { x, y, width, height, globalAlpha = 1, fillStyle = "#000" } = params;
+    ctx.save();
+    ctx.globalAlpha = globalAlpha;
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(x, y, width, height);
+    ctx.restore();
+  }
+
   public renderBlockquoteRect(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -256,7 +275,7 @@ export class Render {
     height: number
   ) {
     ctx.save();
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "#cbcbcb";
     ctx.fillRect(x, y, width, height);
     ctx.restore();
   }
@@ -269,7 +288,20 @@ export class Render {
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
         if (node.marks.has(NodeMark.Blockquote) && j === 0) {
-          this.renderBlockquoteRect(this.ctx, x, y, 3, row.height);
+          this.renderRect(this.ctx, {
+            x,
+            y,
+            width: this.getContentWidth(),
+            height: row.height,
+            fillStyle: "#f8f8f8",
+          });
+          this.renderRect(this.ctx, {
+            x,
+            y,
+            width: 4,
+            height: row.height,
+            fillStyle: "#cbcbcb",
+          });
           x += this.options.blockquotePaddingLeft;
         }
         this.renderNode(node, x, y + row.rowSpacing / 2);

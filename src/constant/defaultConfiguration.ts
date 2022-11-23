@@ -11,4 +11,5 @@ export const defaultConfiguration: IOptions = {
   defaultFontSize: 16,
   defaultFontFamily: "Arial",
   blockquotePaddingLeft: 15,
+  blockquoteMargin: 10,
 };
