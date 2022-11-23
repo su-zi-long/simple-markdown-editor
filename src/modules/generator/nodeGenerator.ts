@@ -17,7 +17,7 @@ export function generateTextNodes(texts: string) {
         x: 0,
         y: 0,
       },
-      marks: new Set(),
+      marks: {},
     });
   }
   return nodes;
@@ -35,6 +35,22 @@ export function generateLineFeedNode(): INode {
       x: 0,
       y: 0,
     },
-    marks: new Set(),
+    marks: {},
+  };
+}
+
+export function generateHorizontalRuleNode(): INode {
+  return {
+    index: 0,
+    type: NodeType.HorizontalRule,
+    metrics: {
+      width: 0,
+      height: 0,
+    },
+    coordinate: {
+      x: 0,
+      y: 0,
+    },
+    marks: {},
   };
 }

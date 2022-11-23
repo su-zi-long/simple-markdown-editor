@@ -37,7 +37,7 @@ export class Render {
         x: 0,
         y: 0,
       },
-      marks: new Set(),
+      marks: {},
     },
   ];
   private rows: IRow[];
@@ -212,7 +212,7 @@ export class Render {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
-        if (node.marks.has(NodeMark.Blockquote) && j === 0) {
+        if (node.marks[NodeMark.Blockquote] && j === 0) {
           x += this.options.blockquotePaddingLeft;
         }
         if (node.index > startIndex && node.index <= endIndex) {
@@ -287,7 +287,7 @@ export class Render {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
         const node = row.nodes[j];
-        if (node.marks.has(NodeMark.Blockquote) && j === 0) {
+        if (node.marks[NodeMark.Blockquote] && j === 0) {
           this.renderRect(this.ctx, {
             x,
             y,

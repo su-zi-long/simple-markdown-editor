@@ -4,6 +4,15 @@ import { INode } from "../../interface/INode";
 import { IRow } from "../../interface/IRow";
 import { Render } from "./Render";
 
+const scale = {
+  "1": 3,
+  "2": 2.5,
+  "3": 2,
+  "4": 1.5,
+  "5": 1.25,
+  "6": 1,
+};
+
 export class Computer {
   private render: Render;
   private ctx: CanvasRenderingContext2D;
@@ -17,20 +26,10 @@ export class Computer {
   private getRowSpacing(node: INode) {
     let rowSpacing = this.render.options.rowSpacing;
 
-    if (node.marks.has(NodeMark.Blockquote)) rowSpacing += 10;
+    if (node.marks[NodeMark.Blockquote]) rowSpacing += 10;
 
-    if (node.marks.has(NodeMark.Heading1)) {
-      rowSpacing *= 3;
-    } else if (node.marks.has(NodeMark.Heading2)) {
-      rowSpacing *= 2.5;
-    } else if (node.marks.has(NodeMark.Heading3)) {
-      rowSpacing *= 2;
-    } else if (node.marks.has(NodeMark.Heading4)) {
-      rowSpacing *= 1.5;
-    } else if (node.marks.has(NodeMark.Heading5)) {
-      rowSpacing *= 1.25;
-    } else if (node.marks.has(NodeMark.Heading6)) {
-      rowSpacing *= 1;
+    if (node.marks[NodeMark.Heading]) {
+      rowSpacing *= scale[node.marks[NodeMark.HeadingLevel] || 6];
     }
     return rowSpacing;
   }
@@ -75,7 +74,7 @@ export class Computer {
           break;
       }
 
-      if (marks.has(NodeMark.Blockquote) && lastRow.nodes.length <= 1) {
+      if (marks[NodeMark.Blockquote] && lastRow.nodes.length <= 1) {
         const blockquotePaddingLeft = this.render.options.blockquotePaddingLeft;
         x += blockquotePaddingLeft;
         remainingWidth -= blockquotePaddingLeft;
@@ -113,28 +112,14 @@ export class Computer {
     let isBold = false;
     let isItalic = false;
 
-    if (marks.has(NodeMark.Heading1)) {
-      fontSize = defaultFontSize * 2;
-      isBold = true;
-    } else if (marks.has(NodeMark.Heading2)) {
-      fontSize = defaultFontSize * 1.5;
-      isBold = true;
-    } else if (marks.has(NodeMark.Heading3)) {
-      fontSize = defaultFontSize * 1.25;
-      isBold = true;
-    } else if (marks.has(NodeMark.Heading4)) {
-      fontSize = defaultFontSize * 1.1;
-      isBold = true;
-    } else if (marks.has(NodeMark.Heading5)) {
-      fontSize = defaultFontSize;
-      isBold = true;
-    } else if (marks.has(NodeMark.Heading6)) {
-      fontSize = defaultFontSize * 0.85;
+    if (node.marks[NodeMark.Heading]) {
+      fontSize =
+        defaultFontSize * scale[node.marks[NodeMark.HeadingLevel] || 6];
       isBold = true;
     }
 
-    if (marks.has(NodeMark.Bold)) isBold = true;
-    if (marks.has(NodeMark.Italic)) isItalic = true;
+    if (marks[NodeMark.Bold]) isBold = true;
+    if (marks[NodeMark.Italic]) isItalic = true;
 
     let font = `${isItalic ? "italic " : ""}${
       isBold ? "bold " : ""

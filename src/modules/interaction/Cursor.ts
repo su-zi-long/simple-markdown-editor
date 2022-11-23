@@ -1,15 +1,30 @@
 import "../../asset/css/cursor.less";
-import { inputFollowMarks } from "../../constant/inputFollowMarks";
 import { KeyboardEvnet } from "../../enum/keyboardEvnet";
 import { NodeMark } from "../../enum/NodeMark";
 import { NodeType } from "../../enum/nodeType";
-import { intersection } from "../../utils/intersection";
 import {
   generateLineFeedNode,
   generateTextNodes,
 } from "../generator/nodeGenerator";
+import { IMarks, INode } from "../../interface/INode";
 
 import { Interaction } from "./Interaction";
+import { deepclone } from "../../utils/deepclone";
+
+function removeRedundantMarks(marks: IMarks) {
+  marks = deepclone(marks);
+  const retainKeys = [
+    NodeMark.Blockquote,
+    NodeMark.Heading,
+    NodeMark.HeadingLevel,
+  ];
+  Object.keys(marks).forEach((key) => {
+    if (!retainKeys.includes(key as NodeMark)) {
+      delete marks[key];
+    }
+  });
+  return marks;
+}
 
 export class Cursor {
   private interaction: Interaction;
@@ -135,12 +150,10 @@ export class Cursor {
     const { data } = event;
     if (this.compositing || !data) return;
     const textNodes = generateTextNodes(data);
-
-    const nodes = this.interaction.editor.render.getNodes();
-    const cursorNodeMarks = this.getCursorNode().marks;
-    textNodes.forEach(
-      (node) => (node.marks = intersection(cursorNodeMarks, inputFollowMarks))
-    );
+    const marks = removeRedundantMarks(this.getCursorNode().marks);
+    textNodes.forEach((node) => {
+      node.marks = deepclone(marks);
+    });
     if (this.interaction.range.hasRange()) {
       this.interaction.replaceNodesByRange(textNodes);
       this.interaction.range.clearRange();
@@ -156,11 +169,11 @@ export class Cursor {
     const cursorNode = this.getCursorNode();
     const lineFeedNode = generateLineFeedNode();
     const row = this.interaction.getRowByNode(cursorNode);
-    if (cursorNode.marks.has(NodeMark.Blockquote)) {
+    if (cursorNode.marks[NodeMark.Blockquote]) {
       if (cursorNode.type === NodeType.LineFeed) {
         this.interaction.deleteNodeByIndexes();
       } else {
-        lineFeedNode.marks.add(NodeMark.Blockquote);
+        lineFeedNode.marks[NodeMark.Blockquote] = true;
       }
     }
     this.interaction.insertNodesByIndexes(lineFeedNode);
@@ -174,7 +187,7 @@ export class Cursor {
       this.interaction.render();
     } else if (this.interaction.cursor.hasCursor()) {
       if (this.interaction.cursor.getIndex() === 0) {
-        this.interaction.cursor.getCursorNode().marks = new Set();
+        this.interaction.cursor.getCursorNode().marks = {};
       } else {
         this.interaction.deleteNodeByIndexes();
       }

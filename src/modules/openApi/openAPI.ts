@@ -24,20 +24,21 @@ export class OpenAPI {
     if (!~index) return;
     const nodes = this.editor.render.getNodes();
     const { startIndex, endIndex } = getParagraphIndex(nodes, index);
-    const has = nodes[startIndex].marks.has(NodeMark[`Heading${level}`]);
-    const removeHeading = HeadingList.filter(
-      (item) => item !== NodeMark[`Heading${level}`]
-    );
+    const has = !!nodes[startIndex].marks[NodeMark.Heading];
 
     for (let i = startIndex; i <= endIndex; i++) {
       const node = nodes[i];
-      has
-        ? node.marks.delete(NodeMark[`Heading${level}`])
-        : node.marks.add(NodeMark[`Heading${level}`]);
-      removeHeading.forEach((item) => node.marks.delete(item));
+      if (has && +node.marks[NodeMark.HeadingLevel] === +level) {
+        delete node.marks[NodeMark.Heading];
+        delete node.marks[NodeMark.HeadingLevel];
+      } else {
+        node.marks[NodeMark.Heading] = true;
+        node.marks[NodeMark.HeadingLevel] = level;
+      }
     }
     this.editor.render.render();
   }
+
   public toggleBold() {
     let startIndex = -1;
     let endIndex = -1;
@@ -59,14 +60,17 @@ export class OpenAPI {
       .getNodes()
       .slice(startIndex, endIndex + 1)
       .filter((item) => item.type === NodeType.Text);
-    const isBoldAll = nodes.every((item) => item.marks.has(NodeMark.Bold));
+    const isBoldAll = nodes.every((item) => item.marks[NodeMark.Bold]);
     nodes.forEach((item) => {
-      isBoldAll
-        ? item.marks.delete(NodeMark.Bold)
-        : item.marks.add(NodeMark.Bold);
+      if (isBoldAll) {
+        delete item.marks[NodeMark.Bold];
+      } else {
+        item.marks[NodeMark.Bold] = true;
+      }
     });
     this.editor.render.render();
   }
+
   public toggleItalic() {
     let startIndex = -1;
     let endIndex = -1;
@@ -88,14 +92,17 @@ export class OpenAPI {
       .getNodes()
       .slice(startIndex, endIndex + 1)
       .filter((item) => item.type === NodeType.Text);
-    const isItalicAll = nodes.every((item) => item.marks.has(NodeMark.Italic));
+    const isItalicAll = nodes.every((item) => item.marks[NodeMark.Italic]);
     nodes.forEach((item) => {
-      isItalicAll
-        ? item.marks.delete(NodeMark.Italic)
-        : item.marks.add(NodeMark.Italic);
+      if (isItalicAll) {
+        delete item.marks[NodeMark.Italic];
+      } else {
+        item.marks[NodeMark.Italic] = true;
+      }
     });
     this.editor.render.render();
   }
+
   public toggleBlockquote() {
     const cursorNode = this.editor.interaction.cursor.getCursorNode();
     if (
@@ -108,18 +115,30 @@ export class OpenAPI {
     const index = this.editor.interaction.cursor.getIndex();
     const nodes = this.editor.render.getNodes();
     const { startIndex, endIndex } = getParagraphIndex(nodes, index);
-    const isBlockquote = cursorNode.marks.has(NodeMark.Blockquote);
+    const isBlockquote = !!cursorNode.marks[NodeMark.Blockquote];
 
     for (let i = startIndex; i <= endIndex; i++) {
       const node = nodes[i];
-      isBlockquote
-        ? node.marks.delete(NodeMark.Blockquote)
-        : node.marks.add(NodeMark.Blockquote);
+      if (isBlockquote) {
+        delete node.marks[NodeMark.Blockquote];
+      } else {
+        node.marks[NodeMark.Blockquote] = true;
+      }
     }
     this.editor.render.render();
-    console.log("==", nodes);
   }
+
   public toggleOrderedList() {}
+
   public toggleUnorderedList() {}
+
   public toggleCode() {}
+
+  public insertHorizontalRule() {
+    const { interaction } = this.editor;
+    const { range } = interaction;
+    if (range.hasRange()) {
+      interaction.replaceNodesByRange();
+    }
+  }
 }
