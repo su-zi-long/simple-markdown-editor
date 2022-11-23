@@ -15,6 +15,9 @@
 </head>
 
 <body>
+  <header>
+    <button class="horizontal-rule">分割线</button>
+  </header>
   <div id="editor"></div>
 
   <script type="module">
@@ -22,6 +25,10 @@
     const editor = new Editor({
       el: '#editor'
     });
+
+    document.querySelector('.horizontal-rule').addEventListener('click', () => {
+      editor.openAPI.insertHorizontalRule()
+    })
   </script>
 </body>
 

@@ -2,6 +2,7 @@ import { NodeMark } from "../../enum/NodeMark";
 import { NodeType } from "../../enum/nodeType";
 import { Editor } from "../../main";
 import { getParagraphIndex } from "../../utils/getParagraphIndex";
+import { generateHorizontalRuleNode } from "../generator/nodeGenerator";
 
 const HeadingList = [
   "Heading1",
@@ -135,10 +136,17 @@ export class OpenAPI {
   public toggleCode() {}
 
   public insertHorizontalRule() {
+    const horizontalRuleNode = generateHorizontalRuleNode();
     const { interaction } = this.editor;
-    const { range } = interaction;
+    const { range, cursor } = interaction;
     if (range.hasRange()) {
-      interaction.replaceNodesByRange();
+      interaction.replaceNodesByRange([horizontalRuleNode]);
+      range.resetRange();
+    } else if (cursor.hasCursor()) {
+      interaction.insertNodesByIndexes(horizontalRuleNode);
+    } else {
+      return;
     }
+    interaction.render();
   }
 }

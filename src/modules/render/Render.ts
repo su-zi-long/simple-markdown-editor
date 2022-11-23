@@ -13,6 +13,7 @@ import { Computer } from "./Computer";
 import { IRow } from "../../interface/IRow";
 import { NodeType } from "../../enum/nodeType";
 import { NodeMark } from "../../enum/NodeMark";
+import { HorizontalRuleNodeLineHeight } from "../../constant/config";
 
 /**
  * 渲染类
@@ -194,7 +195,7 @@ export class Render {
     this.editor.interaction.cursor.showCursor();
 
     if (renderRange) this.renderRange();
-    // console.log(this.rows);
+    console.log(this.rows);
   }
 
   public renderRange() {
@@ -321,6 +322,8 @@ export class Render {
       case NodeType.Text:
         this.renderTextNode(node, x, y);
         break;
+      case NodeType.HorizontalRule:
+        this.renderHorizontalRuleNode(node, x, y);
     }
   }
 
@@ -331,5 +334,16 @@ export class Render {
     ctx.font = this.computer.getNodeFont(node);
     ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
     ctx.restore();
+  }
+
+  private renderHorizontalRuleNode(node: INode, x: number, y: number) {
+    const { ctx } = this;
+    const { width, height } = node.metrics;
+    this.renderRect(ctx, {
+      x,
+      y: y + height / 2 - HorizontalRuleNodeLineHeight / 2,
+      width,
+      height: HorizontalRuleNodeLineHeight,
+    });
   }
 }

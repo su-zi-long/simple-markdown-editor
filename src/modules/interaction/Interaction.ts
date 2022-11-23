@@ -109,9 +109,8 @@ export class Interaction {
     return result;
   }
 
-  public replaceNodesByRange(replaceNode?: INode[], moveCursor = true) {
+  public replaceNodesByRange(replaceNode: INode[] = [], moveCursor = true) {
     if (!this.range.hasRange()) return false;
-    replaceNode = replaceNode || [];
     const nodes = this.editor.render.getNodes();
     const { startIndexes, endIndexes } = this.range.getIndexes();
     const startIndex = startIndexes[0] + 1;

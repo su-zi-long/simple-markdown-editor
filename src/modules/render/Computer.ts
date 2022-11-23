@@ -1,3 +1,4 @@
+import { HorizontalRuleNodeHeight } from "../../constant/config";
 import { NodeMark } from "../../enum/NodeMark";
 import { NodeType } from "../../enum/nodeType";
 import { INode } from "../../interface/INode";
@@ -57,18 +58,18 @@ export class Computer {
       let width = 0;
       let height = 0;
       let isLineFeed = false;
+      let isBlock = false;
+
+      node.metrics = this.getNodeMetrics(node);
+      ({ width, height } = node.metrics);
 
       switch (node.type) {
-        case NodeType.Text: {
-          node.metrics = this.getNodeMetrics(node);
-          ({ width, height } = node.metrics);
-          break;
-        }
         case NodeType.LineFeed: {
-          node.metrics = this.getNodeMetrics(node);
-          ({ width, height } = node.metrics);
           isLineFeed = true;
           break;
+        }
+        case NodeType.HorizontalRule: {
+          isBlock = true;
         }
         default:
           break;
@@ -88,13 +89,15 @@ export class Computer {
         lastRow.rowSpacing = rowSpacing;
       }
 
+      if (isBlock) isLineFeed = true;
+
       if (isLineFeed) {
         rows.push({
           nodes: [node],
           height,
           rowSpacing: 0,
         });
-        remainingWidth = contentWidth - width;
+        remainingWidth = isBlock ? 0 : contentWidth - width;
       } else {
         lastRow.nodes.push(node);
         remainingWidth -= width;
@@ -128,6 +131,15 @@ export class Computer {
   }
 
   public getNodeMetrics(node: INode) {
+    switch (node.type) {
+      case NodeType.Text:
+      case NodeType.LineFeed:
+        return this.getTextNodeMetrics(node);
+      case NodeType.HorizontalRule:
+        return this.getHorizontalRuleNodeMetrics(node);
+    }
+  }
+  public getTextNodeMetrics(node: INode) {
     const { ctx } = this;
     const { defaultFontSize } = this.render.editor.options;
     ctx.save();
@@ -140,6 +152,13 @@ export class Computer {
         textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent,
       fontBoundingBoxAscent: textMetrics.fontBoundingBoxAscent,
       fontBoundingBoxDescent: textMetrics.fontBoundingBoxDescent,
+    };
+  }
+
+  public getHorizontalRuleNodeMetrics(node: INode) {
+    return {
+      width: this.render.getContentWidth(),
+      height: HorizontalRuleNodeHeight,
     };
   }
 }
