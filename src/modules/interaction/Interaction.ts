@@ -1,4 +1,5 @@
 import { INode } from "../../interface/INode";
+import { IRenderOptions } from "../../interface/IRenderOptions";
 import { IRow } from "../../interface/IRow";
 import { Editor } from "../../main";
 import { Cursor } from "./Cursor";
@@ -96,23 +97,46 @@ export class Interaction {
     return nodes[nodes.length - 1].index;
   }
 
-  public insertNodesByIndexes(insertNodes: INode[] | INode) {
+  public insertNodesByIndexes(insertNodes: INode[] | INode, moveCursor = true) {
     insertNodes = Array.isArray(insertNodes) ? insertNodes : [insertNodes];
     const nodes = this.editor.render.getNodes();
     const indexes = this.cursor.getIndexes();
     const index = indexes[0];
-    nodes.splice(index + 1, 0, ...insertNodes);
+    const result = nodes.splice(index + 1, 0, ...insertNodes);
+    if (moveCursor) {
+      this.cursor.moveCursor(insertNodes.length);
+    }
+    return result;
   }
 
-  public deleteNodeByIndexes() {
+  public replaceNodesByRange(replaceNode?: INode[], moveCursor = true) {
+    if (!this.range.hasRange()) return false;
+    replaceNode = replaceNode || []
+    const nodes = this.editor.render.getNodes();
+    const { startIndexes, endIndexes } = this.range.getIndexes();
+    const startIndex = startIndexes[0] + 1;
+    const endIndex = endIndexes[0];
+    const count = endIndex - startIndex + 1;
+    const result = nodes.splice(startIndex, count, ...replaceNode);
+    if (moveCursor) {
+      this.cursor.setIndexes([startIndexes[0] + replaceNode.length]);
+    }
+    return result;
+  }
+
+  public deleteNodeByIndexes(moveCursor = true) {
     const nodes = this.editor.render.getNodes();
     const index = this.cursor.getIndex();
     if (index === 0) return false;
-    return nodes.splice(index, 1);
+    const result = nodes.splice(index, 1);
+    if (moveCursor) {
+      this.cursor.moveCursor(-1);
+    }
+    return result;
   }
 
-  public render() {
-    this.editor.render.render();
+  public render(renderOptions?: IRenderOptions) {
+    this.editor.render.render(renderOptions);
   }
 
   public renderRange() {

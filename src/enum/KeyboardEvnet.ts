@@ -1,7 +1,7 @@
 export enum KeyboardEvnet {
   Enter = "ENTER",
-  Backspace = "Backspace",
-  ArrowLeft = "BACKSPACE",
+  Backspace = "BACKSPACE",
+  ArrowLeft = "ARROWLEFT",
   ArrowUp = "ARROWUP",
   ArrowRight = "ARROWRIGHT",
   ArrowDown = "ARROWDOWN",

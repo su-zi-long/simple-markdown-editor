@@ -139,24 +139,32 @@ export class Cursor {
     textNodes.forEach(
       (node) => (node.marks = intersection(cursorNodeMarks, inputFollowMarks))
     );
-
-    this.interaction.insertNodesByIndexes(textNodes);
-    this.moveCursor(textNodes.length);
+    if (this.interaction.range.hasRange()) {
+      this.interaction.replaceNodesByRange(textNodes);
+      this.interaction.range.clearRange();
+    } else if (this.hasCursor()) {
+      this.interaction.insertNodesByIndexes(textNodes);
+    } else {
+      return
+    }
     this.interaction.render();
   }
 
   private enter() {
     const lineFeedNode = generateLineFeedNode();
     this.interaction.insertNodesByIndexes(lineFeedNode);
-    this.moveCursor(1);
     this.interaction.render();
   }
 
   private backspace() {
-    const result = this.interaction.deleteNodeByIndexes();
-    if (!result) return;
-    this.moveCursor(-1);
-    this.interaction.render();
+    if (this.interaction.range.hasRange()) {
+      this.interaction.replaceNodesByRange();
+      this.interaction.range.resetRange();
+      this.interaction.render();
+    } else if (this.interaction.cursor.hasCursor()) {
+      this.interaction.deleteNodeByIndexes();
+      this.interaction.render();
+    }
   }
 
   private arrowLeft() {}

@@ -187,20 +187,22 @@ export class Render {
   }
 
   public render(renderOptions?: IRenderOptions) {
+    const { renderRange = true } = renderOptions || {};
     this.clearCanvas(this.ctx);
     this.rows = this.computer.compute(this.nodes);
     this.renderRows(this.rows);
     this.editor.interaction.cursor.showCursor();
-    console.log(this.rows);
+
+    if (renderRange) this.renderRange();
+    // console.log(this.rows);
   }
 
   public renderRange() {
-    const { range } = this.editor.interaction;
-    if (!range.hasRange()) return;
     this.clearCanvas(this.rangeCtx);
+    const { range, cursor } = this.editor.interaction;
+    if (!range.hasRange()) return;
     const { rows } = this;
-    const { startIndexes, endIndexes } =
-      this.editor.interaction.range.getIndexes();
+    const { startIndexes, endIndexes } = range.getIndexes();
     const startIndex = startIndexes[0];
     const endIndex = endIndexes[0];
     let x = this.getX();
@@ -228,12 +230,8 @@ export class Render {
       y += row.height;
     }
 
-    this.editor.interaction.cursor.hideCursor();
-    this.editor.interaction.cursor.getFocus();
-  }
-
-  public clearRange() {
-    this.clearCanvas(this.rangeCtx);
+    cursor.hideCursor();
+    cursor.getFocus();
   }
 
   public renderRangeRect(

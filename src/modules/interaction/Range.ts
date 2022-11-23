@@ -16,7 +16,7 @@ export class Range {
       this.endIndexes = [-1];
       return;
     }
-    
+
     let exchange = false;
     for (let i = 0; i < indexes1.length; i++) {
       const index1 = indexes1[i];
@@ -49,9 +49,13 @@ export class Range {
     return this.startIndexes[0] >= 0 && this.endIndexes[0] >= 0;
   }
 
-  public clearRange() {
+  public resetRange() {
     this.startIndexes = [-1];
     this.endIndexes = [-1];
-    this.interaction.editor.render.clearRange();
+  }
+
+  public clearRange() {
+    this.resetRange();
+    this.interaction.editor.render.renderRange();
   }
 }
