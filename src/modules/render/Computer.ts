@@ -70,6 +70,7 @@ export class Computer {
         }
         case NodeType.HorizontalRule: {
           isBlock = true;
+          break;
         }
         default:
           break;
