@@ -2,7 +2,13 @@ import { NodeMark } from "../../enum/NodeMark";
 import { NodeType } from "../../enum/nodeType";
 import { Editor } from "../../main";
 import { getParagraphIndex } from "../../utils/getParagraphIndex";
-import { generateHorizontalRuleNode } from "../generator/nodeGenerator";
+import {
+  generateHorizontalRuleNode,
+  generateTextNodes,
+} from "../generator/nodeGenerator";
+
+import Dialog from "lu2/theme/pure/js/common/ui/Dialog";
+import "lu2/theme/pure/css/common/ui.css";
 
 const HeadingList = [
   "Heading1",
@@ -127,6 +133,64 @@ export class OpenAPI {
       }
     }
     this.editor.render.render();
+  }
+
+  public insertLink() {
+    const { interaction } = this.editor;
+    const { cursor, range } = interaction;
+
+    const _insertLink = (text: string, link: string) => {
+      const textNodes = generateTextNodes(text, {
+        [NodeMark.Link]: link,
+      });
+      if (range.hasRange()) {
+        interaction.replaceNodesByRange(textNodes);
+        range.clearRange();
+      } else if (cursor.hasCursor()) {
+        interaction.insertNodesByIndexes(textNodes);
+      } else {
+        return;
+      }
+      interaction.render();
+    };
+
+    new Dialog({
+      title: "链接",
+      content: `
+      <div class="simple-markdown-editor-link-form">
+        <div>
+          <span>文本：</span><input class="ui-input text">
+        </div>
+        <br>
+        <div>
+          <span>链接：</span><input class="ui-input link" value="http://">
+        </div>
+      </div>
+      `,
+      buttons: [
+        {
+          value: "确定",
+          events: {
+            click: (event) => {
+              const form = document.querySelector(
+                ".simple-markdown-editor-link-form"
+              );
+              const text = (
+                form.querySelector("input.text") as HTMLInputElement
+              ).value;
+              const link = (
+                form.querySelector("input.link") as HTMLInputElement
+              ).value;
+              _insertLink(text, link);
+              event.dialog.remove();
+            },
+          },
+        },
+        {
+          value: "取消",
+        },
+      ],
+    });
   }
 
   public toggleOrderedList() {}

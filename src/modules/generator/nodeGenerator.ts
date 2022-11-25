@@ -1,7 +1,8 @@
+import { NodeMark } from "../../enum/NodeMark";
 import { NodeType } from "../../enum/nodeType";
-import { INode } from "../../interface/INode";
+import { IMarks, INode } from "../../interface/INode";
 
-export function generateTextNodes(texts: string) {
+export function generateTextNodes(texts: string, marks: IMarks = {}) {
   const nodes: INode[] = [];
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i];
@@ -17,7 +18,7 @@ export function generateTextNodes(texts: string) {
         x: 0,
         y: 0,
       },
-      marks: {},
+      marks,
     });
   }
   return nodes;

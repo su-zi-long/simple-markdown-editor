@@ -66,6 +66,7 @@ export class Cursor {
     });
     this.cursorAgent.addEventListener("blur", () => {
       this.isFocus = false;
+      // console.log('失去焦点')
     });
   }
 

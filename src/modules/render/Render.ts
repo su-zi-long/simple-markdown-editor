@@ -329,10 +329,50 @@ export class Render {
 
   private renderTextNode(node: INode, x: number, y: number) {
     const { ctx } = this;
-    const { fontBoundingBoxAscent } = node.metrics;
+    const { width, height, fontBoundingBoxAscent } = node.metrics;
+    const color = this.computer.getNodeFontColor(node);
     ctx.save();
     ctx.font = this.computer.getNodeFont(node);
+    ctx.fillStyle = color;
     ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
+    ctx.restore();
+
+    if (node.marks[NodeMark.Link] !== undefined) {
+      this.renderLine({
+        ctx,
+        startX: x,
+        startY: y + height,
+        endX: x + width,
+        endY: y + height,
+        color,
+      });
+    }
+  }
+
+  private renderLine(params: {
+    ctx: CanvasRenderingContext2D;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    lineWidth?: number;
+    color?: string;
+  }) {
+    const {
+      ctx,
+      startX,
+      startY,
+      endX,
+      endY,
+      lineWidth = 1,
+      color = "#000",
+    } = params;
+    ctx.save();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+    ctx.stroke();
     ctx.restore();
   }
 

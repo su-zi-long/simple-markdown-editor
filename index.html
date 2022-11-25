@@ -13,14 +13,23 @@
     }
 
     .toolbar button {
-      margin: 5px 15px;
+      margin: 5px;
     }
   </style>
 </head>
 
 <body>
   <header class="toolbar">
+    <button class="heading1">标题1</button>
+    <button class="heading2">标题2</button>
+    <button class="heading3">标题3</button>
+    <button class="heading4">标题4</button>
+    <button class="heading5">标题5</button>
+    <button class="heading6">标题6</button>
     <button class="bold">加粗</button>
+    <button class="italic">斜体</button>
+    <button class="blockquote">引用</button>
+    <button class="link">链接</button>
     <button class="horizontal-rule">分割线</button>
   </header>
   <div id="editor"></div>
@@ -31,6 +40,36 @@
       el: '#editor'
     });
 
+    document.querySelector('.heading1').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(1)
+    })
+    document.querySelector('.heading2').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(2)
+    })
+    document.querySelector('.heading3').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(3)
+    })
+    document.querySelector('.heading4').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(4)
+    })
+    document.querySelector('.heading5').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(5)
+    })
+    document.querySelector('.heading6').addEventListener('click', () => {
+      editor.openAPI.toggleHeading(6)
+    })
+    document.querySelector('.bold').addEventListener('click', () => {
+      editor.openAPI.toggleBold()
+    })
+    document.querySelector('.italic').addEventListener('click', () => {
+      editor.openAPI.toggleItalic()
+    })
+    document.querySelector('.blockquote').addEventListener('click', () => {
+      editor.openAPI.toggleBlockquote()
+    })
+    document.querySelector('.link').addEventListener('click', () => {
+      editor.openAPI.insertLink()
+    })
     document.querySelector('.horizontal-rule').addEventListener('click', () => {
       editor.openAPI.insertHorizontalRule()
     })

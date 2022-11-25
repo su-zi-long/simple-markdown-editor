@@ -1,3 +1,4 @@
+import { NodeMark } from "../../enum/NodeMark";
 import { INode } from "../../interface/INode";
 import { IRenderOptions } from "../../interface/IRenderOptions";
 import { IRow } from "../../interface/IRow";
@@ -45,6 +46,11 @@ export class Interaction {
     this.cursor.showCursor();
     this.range.clearRange();
     this.isMousedown = true;
+
+    const cursorNode = this.cursor.getCursorNode();
+    if (cursorNode.marks[NodeMark.Link]) {
+      window.open(cursorNode.marks[NodeMark.Link]);
+    }
   }
 
   private mouseup() {

@@ -131,6 +131,11 @@ export class Computer {
     return font;
   }
 
+  public getNodeFontColor(node: INode) {
+    if (node.marks[NodeMark.Link] !== undefined) return '#0269c8'
+    return '#000000';
+  }
+
   public getNodeMetrics(node: INode) {
     switch (node.type) {
       case NodeType.Text:
@@ -140,6 +145,7 @@ export class Computer {
         return this.getHorizontalRuleNodeMetrics(node);
     }
   }
+  
   public getTextNodeMetrics(node: INode) {
     const { ctx } = this;
     const { defaultFontSize } = this.render.editor.options;
