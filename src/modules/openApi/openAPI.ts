@@ -4,6 +4,7 @@ import { Editor } from "../../main";
 import { getParagraphIndex } from "../../utils/getParagraphIndex";
 import {
   generateHorizontalRuleNode,
+  generateImageNode,
   generateTextNodes,
 } from "../generator/nodeGenerator";
 
@@ -143,15 +144,7 @@ export class OpenAPI {
       const textNodes = generateTextNodes(text, {
         [NodeMark.Link]: link,
       });
-      if (range.hasRange()) {
-        interaction.replaceNodesByRange(textNodes);
-        range.clearRange();
-      } else if (cursor.hasCursor()) {
-        interaction.insertNodesByIndexes(textNodes);
-      } else {
-        return;
-      }
-      interaction.render();
+      interaction.insertNodes(textNodes);
     };
 
     new Dialog({
@@ -191,6 +184,32 @@ export class OpenAPI {
         },
       ],
     });
+  }
+
+  public insertImage() {
+    const _insertImage = (base64: string, width: number, height: number) => {
+      const imageNode = generateImageNode(base64, width, height);
+      this.editor.interaction.insertNodes([imageNode]);
+    };
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".png, .jpg, .jpeg, .webp";
+    fileInput.click();
+    fileInput.onchange = () => {
+      const file = fileInput.files![0]!;
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        const imageEl = new Image();
+        const value = fileReader.result as string;
+        imageEl.src = value;
+        imageEl.onload = () => {
+          _insertImage(value, imageEl.width, imageEl.height);
+          fileInput.value = "";
+        };
+      };
+    };
   }
 
   public toggleOrderedList() {}

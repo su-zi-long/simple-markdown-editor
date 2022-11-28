@@ -324,6 +324,8 @@ export class Render {
         break;
       case NodeType.HorizontalRule:
         this.renderHorizontalRuleNode(node, x, y);
+      case NodeType.Image:
+        this.renderImageNode(this.ctx, node, x, y);
     }
   }
 
@@ -347,6 +349,19 @@ export class Render {
         color,
       });
     }
+  }
+
+  private renderImageNode(
+    ctx: CanvasRenderingContext2D,
+    node: INode,
+    x: number,
+    y: number
+  ) {
+    const img = new Image();
+    img.src = node.text;
+    img.onload = () => {
+      ctx.drawImage(img, x, y, node.metrics.width, node.metrics.height);
+    };
   }
 
   private renderLine(params: {

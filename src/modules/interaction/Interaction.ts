@@ -103,6 +103,20 @@ export class Interaction {
     return nodes[nodes.length - 1].index;
   }
 
+  public insertNodes(nodes: INode[], isRender = true) {
+    const { cursor, range } = this;
+    if (range.hasRange()) {
+      this.replaceNodesByRange(nodes);
+      range.clearRange();
+      this.render();
+    } else if (cursor.hasCursor()) {
+      this.insertNodesByIndexes(nodes);
+      this.render();
+    } else {
+      return;
+    }
+  }
+
   public insertNodesByIndexes(insertNodes: INode[] | INode, moveCursor = true) {
     insertNodes = Array.isArray(insertNodes) ? insertNodes : [insertNodes];
     const nodes = this.editor.render.getNodes();

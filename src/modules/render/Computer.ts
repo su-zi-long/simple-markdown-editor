@@ -132,8 +132,8 @@ export class Computer {
   }
 
   public getNodeFontColor(node: INode) {
-    if (node.marks[NodeMark.Link] !== undefined) return '#0269c8'
-    return '#000000';
+    if (node.marks[NodeMark.Link] !== undefined) return "#0269c8";
+    return "#000000";
   }
 
   public getNodeMetrics(node: INode) {
@@ -143,9 +143,12 @@ export class Computer {
         return this.getTextNodeMetrics(node);
       case NodeType.HorizontalRule:
         return this.getHorizontalRuleNodeMetrics(node);
+      case NodeType.Image: {
+        return this.getImageMetrics(node);
+      }
     }
   }
-  
+
   public getTextNodeMetrics(node: INode) {
     const { ctx } = this;
     const { defaultFontSize } = this.render.editor.options;
@@ -167,5 +170,18 @@ export class Computer {
       width: this.render.getContentWidth(),
       height: HorizontalRuleNodeHeight,
     };
+  }
+
+  public getImageMetrics(node: INode) {
+    const contentWidth = this.render.getContentWidth();
+    const { metrics } = node;
+    const { width, height } = metrics;
+
+    if (width > contentWidth) {
+      metrics.width = contentWidth;
+      metrics.height = height * (1 - (width - contentWidth) / width);
+    }
+    
+    return metrics;
   }
 }

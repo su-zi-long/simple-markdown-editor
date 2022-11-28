@@ -155,15 +155,7 @@ export class Cursor {
     textNodes.forEach((node) => {
       node.marks = deepclone(marks);
     });
-    if (this.interaction.range.hasRange()) {
-      this.interaction.replaceNodesByRange(textNodes);
-      this.interaction.range.clearRange();
-    } else if (this.hasCursor()) {
-      this.interaction.insertNodesByIndexes(textNodes);
-    } else {
-      return;
-    }
-    this.interaction.render();
+    this.interaction.insertNodes(textNodes);
   }
 
   private enter() {

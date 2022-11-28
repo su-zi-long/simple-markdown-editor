@@ -55,3 +55,22 @@ export function generateHorizontalRuleNode(): INode {
     marks: {},
   };
 }
+
+export function generateImageNode(imageBase64: string, width: number, height: number): INode {
+  return {
+    index: 0,
+    type: NodeType.Image,
+    text: imageBase64,
+    metrics: {
+      width,
+      height,
+      imageOriginalWidth: width,
+      imageOriginalHeight: height,
+    },
+    coordinate: {
+      x: 0,
+      y: 0,
+    },
+    marks: {},
+  };
+}

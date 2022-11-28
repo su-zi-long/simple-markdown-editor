@@ -5,6 +5,8 @@ export interface IMetrics {
   height: number;
   fontBoundingBoxAscent?: number;
   fontBoundingBoxDescent?: number;
+  imageOriginalWidth?: number;
+  imageOriginalHeight?: number;
 }
 
 export interface IMarks {
@@ -15,7 +17,7 @@ export interface INode {
   index: number;
   type: NodeType;
   nodes?: INode[];
-  text?: string; // 元素的文本
+  text?: string;
   metrics: IMetrics;
   coordinate: { x: number; y: number };
   marks: IMarks;
