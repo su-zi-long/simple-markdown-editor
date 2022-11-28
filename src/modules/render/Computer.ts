@@ -133,6 +133,7 @@ export class Computer {
 
   public getNodeFontColor(node: INode) {
     if (node.marks[NodeMark.Link] !== undefined) return "#0269c8";
+    if (node.marks[NodeMark.Code] === true) return "#ff502c";
     return "#000000";
   }
 

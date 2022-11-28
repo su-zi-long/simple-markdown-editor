@@ -216,7 +216,43 @@ export class OpenAPI {
 
   public toggleUnorderedList() {}
 
-  public toggleCode() {}
+  public insertCode() {
+    const _insertCode = (code: string) => {
+      const textNodes = generateTextNodes(code, {
+        [NodeMark.Code]: true,
+      });
+      this.editor.interaction.insertNodes(textNodes);
+    };
+
+    new Dialog({
+      title: "代码",
+      content: `
+        <div class="simple-markdown-editor-code-form">
+          <input class="ui-input code" style="width: 100%">
+        </div>
+      `,
+      buttons: [
+        {
+          value: "确定",
+          events: {
+            click: (event) => {
+              const form = document.querySelector(
+                ".simple-markdown-editor-code-form"
+              );
+              const code = (
+                form.querySelector("input.code") as HTMLInputElement
+              ).value;
+              _insertCode(code);
+              event.dialog.remove();
+            },
+          },
+        },
+        {
+          value: "取消",
+        },
+      ],
+    });
+  }
 
   public insertHorizontalRule() {
     const horizontalRuleNode = generateHorizontalRuleNode();

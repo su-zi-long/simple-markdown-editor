@@ -6,37 +6,47 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>simple-markdown-editor</title>
+  <link rel="stylesheet" href="https://qidian.gtimg.com/lulu/pure/css/common/ui.css">
   <style>
     * {
       margin: 0;
       padding: 0;
     }
 
-    .toolbar button {
-      margin: 5px;
+    .toolbar {
+      padding: 5px;
+    }
+
+    .toolbar>.ui-button {
+      padding: 0;
+      height: 34px;
+      min-width: 50px;
     }
   </style>
 </head>
 
 <body>
   <header class="toolbar">
-    <button class="heading1">标题1</button>
-    <button class="heading2">标题2</button>
-    <button class="heading3">标题3</button>
-    <button class="heading4">标题4</button>
-    <button class="heading5">标题5</button>
-    <button class="heading6">标题6</button>
-    <button class="bold">加粗</button>
-    <button class="italic">斜体</button>
-    <button class="blockquote">引用</button>
-    <button class="link">链接</button>
-    <button class="image">图片</button>
-    <button class="horizontal-rule">分割线</button>
+    <button class="ui-button heading1">标题1</button>
+    <button class="ui-button heading2">标题2</button>
+    <button class="ui-button heading3">标题3</button>
+    <button class="ui-button heading4">标题4</button>
+    <button class="ui-button heading5">标题5</button>
+    <button class="ui-button heading6">标题6</button>
+    <button class="ui-button bold">加粗</button>
+    <button class="ui-button italic">斜体</button>
+    <button class="ui-button blockquote">引用</button>
+    <button class="ui-button link">链接</button>
+    <button class="ui-button image">图片</button>
+    <button class="ui-button horizontal-rule">分割线</button>
+    <button class="ui-button code">代码</button>
   </header>
   <div id="editor"></div>
 
+  <script src="https://qidian.gtimg.com/lulu/pure/js/common/all.js"></script>
   <script type="module">
     import { Editor } from './src/main.ts'
+
     const editor = new Editor({
       el: '#editor'
     });
@@ -76,6 +86,9 @@
     })
     document.querySelector('.horizontal-rule').addEventListener('click', () => {
       editor.openAPI.insertHorizontalRule()
+    })
+    document.querySelector('.code').addEventListener('click', () => {
+      editor.openAPI.insertCode()
     })
   </script>
 </body>

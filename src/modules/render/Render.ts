@@ -333,12 +333,16 @@ export class Render {
     const { ctx } = this;
     const { width, height, fontBoundingBoxAscent } = node.metrics;
     const color = this.computer.getNodeFontColor(node);
-    ctx.save();
-    ctx.font = this.computer.getNodeFont(node);
-    ctx.fillStyle = color;
-    ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
-    ctx.restore();
 
+    if (node.marks[NodeMark.Code] === true) {
+      this.renderRect(ctx, {
+        x,
+        y: y - 1,
+        width,
+        height: height + 2,
+        fillStyle: "#dddddd",
+      });
+    }
     if (node.marks[NodeMark.Link] !== undefined) {
       this.renderLine({
         ctx,
@@ -349,6 +353,12 @@ export class Render {
         color,
       });
     }
+
+    ctx.save();
+    ctx.font = this.computer.getNodeFont(node);
+    ctx.fillStyle = color;
+    ctx.fillText(node.text, x, y + fontBoundingBoxAscent);
+    ctx.restore();
   }
 
   private renderImageNode(
