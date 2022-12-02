@@ -1,5 +1,6 @@
 import { NodeMark } from "../enum/NodeMark";
 import { NodeType } from "../enum/nodeType";
+import { IRow } from "./IRow";
 export interface IMetrics {
   width: number;
   height: number;
@@ -17,6 +18,7 @@ export interface INode {
   index: number;
   type: NodeType;
   nodes?: INode[];
+  rows?: IRow[];
   text?: string;
   metrics: IMetrics;
   coordinate: { x: number; y: number };

@@ -12,4 +12,5 @@ export const defaultConfiguration: IOptions = {
   defaultFontFamily: "Arial",
   blockquotePaddingLeft: 15,
   blockquoteMargin: 10,
+  codeBlockPaddings: [20, 20, 20, 20],
 };

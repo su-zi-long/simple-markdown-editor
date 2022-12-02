@@ -222,20 +222,28 @@ export class Cursor {
     return this.indexes;
   }
 
-  public getIndex(level = 0) {
-    return this.indexes[level];
+  public getIndex() {
+    const index = this.indexes[this.indexes.length - 1];
+    return index >= 0 ? index : -1;
   }
 
   public getCursorNode() {
-    return this.interaction.editor.render.getNodes()[this.getIndex()];
+    let nodes = this.interaction.editor.render.getNodes();
+    let node = null;
+    this.indexes.forEach((index) => {
+      node = nodes[index];
+      nodes = node.nodes;
+    });
+    return node;
   }
 
   public showCursor() {
+    const cursorNode = this.getCursorNode();
+    if (!cursorNode) return;
+
     const { cursor, cursorAgent } = this;
     cursor.style.display = "block";
     this.getFocus();
-    const cursorNode = this.getCursorNode();
-    if (!cursorNode) return;
     const {
       coordinate: { x, y },
       metrics: { width, height },

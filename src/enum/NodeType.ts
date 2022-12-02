@@ -3,4 +3,5 @@ export enum NodeType {
   LineFeed = "LineFeed",
   HorizontalRule = "HorizontalRule",
   Image = "Image",
+  CodeBlock = "CodeBlock",
 }

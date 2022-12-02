@@ -190,8 +190,8 @@ export class Render {
   public render(renderOptions?: IRenderOptions) {
     const { renderRange = true } = renderOptions || {};
     this.clearCanvas(this.ctx);
-    this.rows = this.computer.compute(this.nodes);
-    this.renderRows(this.rows);
+    this.rows = this.computer.compute(this.nodes, this.getContentWidth());
+    this.renderRows(this.rows, this.getX(), this.getY());
     this.editor.interaction.cursor.showCursor();
 
     if (renderRange) this.renderRange();
@@ -281,9 +281,8 @@ export class Render {
     ctx.restore();
   }
 
-  private renderRows(rows: IRow[]) {
-    let x = this.getX();
-    let y = this.getY();
+  private renderRows(rows: IRow[], x: number, y: number) {
+    const initialX = x;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       for (let j = 0; j < row.nodes.length; j++) {
@@ -308,7 +307,7 @@ export class Render {
         this.renderNode(node, x, y + row.rowSpacing / 2);
         x += node?.metrics?.width || 0;
       }
-      x = this.getX();
+      x = initialX;
       y += row.height;
     }
   }
@@ -324,8 +323,13 @@ export class Render {
         break;
       case NodeType.HorizontalRule:
         this.renderHorizontalRuleNode(node, x, y);
+        break;
       case NodeType.Image:
         this.renderImageNode(this.ctx, node, x, y);
+        break;
+      case NodeType.CodeBlock:
+        this.renderCodeBlockNode(this.ctx, node, x, y);
+        break;
     }
   }
 
@@ -372,6 +376,23 @@ export class Render {
     img.onload = () => {
       ctx.drawImage(img, x, y, node.metrics.width, node.metrics.height);
     };
+  }
+
+  private renderCodeBlockNode(
+    ctx: CanvasRenderingContext2D,
+    node: INode,
+    x: number,
+    y: number
+  ) {
+    const paddings = this.options.codeBlockPaddings;
+    this.renderRect(ctx, {
+      x,
+      y,
+      width: node.metrics.width,
+      height: node.metrics.height,
+      fillStyle: "#f8f8f8",
+    });
+    this.renderRows(node.rows, x + paddings[3], y + paddings[0]);
   }
 
   private renderLine(params: {

@@ -40,6 +40,7 @@
     <button class="ui-button image">图片</button>
     <button class="ui-button horizontal-rule">分割线</button>
     <button class="ui-button code">代码</button>
+    <button class="ui-button code-block">代码块</button>
   </header>
   <div id="editor"></div>
 
@@ -89,6 +90,9 @@
     })
     document.querySelector('.code').addEventListener('click', () => {
       editor.openAPI.insertCode()
+    })
+    document.querySelector('.code-block').addEventListener('click', () => {
+      editor.openAPI.insertCodeBlock()
     })
   </script>
 </body>

@@ -3,6 +3,7 @@ import { NodeType } from "../../enum/nodeType";
 import { Editor } from "../../main";
 import { getParagraphIndex } from "../../utils/getParagraphIndex";
 import {
+  generateCodeBlockNode,
   generateHorizontalRuleNode,
   generateImageNode,
   generateTextNodes,
@@ -243,6 +244,42 @@ export class OpenAPI {
                 form.querySelector("input.code") as HTMLInputElement
               ).value;
               _insertCode(code);
+              event.dialog.remove();
+            },
+          },
+        },
+        {
+          value: "取消",
+        },
+      ],
+    });
+  }
+
+  public insertCodeBlock() {
+    const _insertCodeBlock = (code: string) => {
+      const codeBlockNodes = generateCodeBlockNode(code);
+      this.editor.interaction.insertNodes([codeBlockNodes]);
+    };
+
+    new Dialog({
+      title: "代码块",
+      content: `
+        <div class="simple-markdown-editor-code-form ui-textarea">
+          <textarea rows="10" class="code-block" style="width: 100%;"></textarea>
+        </div>
+      `,
+      buttons: [
+        {
+          value: "确定",
+          events: {
+            click: (event) => {
+              const form = document.querySelector(
+                ".simple-markdown-editor-code-form"
+              );
+              const code = (
+                form.querySelector("textarea.code-block") as HTMLTextAreaElement
+              ).value;
+              _insertCodeBlock(code);
               event.dialog.remove();
             },
           },

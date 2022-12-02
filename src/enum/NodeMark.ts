@@ -7,5 +7,6 @@ export enum NodeMark {
   OrderedList = "OrderedList",
   UnorderedList = "UnorderedList",
   Code = "Code",
+  CodeBlock = "CodeBlock",
   Link = "Link",
 }

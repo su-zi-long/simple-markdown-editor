@@ -35,7 +35,7 @@ export class Computer {
     return rowSpacing;
   }
 
-  public compute(nodes: INode[]) {
+  public compute(nodes: INode[], contentWidth: number) {
     const rows: IRow[] = [
       {
         nodes: [],
@@ -45,7 +45,6 @@ export class Computer {
     ];
     const { render } = this;
     const { options } = render;
-    const contentWidth = render.getContentWidth();
     let remainingWidth = contentWidth;
     let x = options.paddings[3];
     let y = options.paddings[0];
@@ -60,14 +59,19 @@ export class Computer {
       let isLineFeed = false;
       let isBlock = false;
 
-      node.metrics = this.getNodeMetrics(node);
-      ({ width, height } = node.metrics);
-
       switch (node.type) {
         case NodeType.LineFeed: {
           isLineFeed = true;
           break;
         }
+        case NodeType.CodeBlock:
+          const paddings = this.render.options.codeBlockPaddings;
+          node.rows = this.compute(
+            node.nodes || [],
+            contentWidth - paddings[1] - paddings[3]
+          );
+          isBlock = true;
+          break;
         case NodeType.HorizontalRule: {
           isBlock = true;
           break;
@@ -75,6 +79,9 @@ export class Computer {
         default:
           break;
       }
+
+      node.metrics = this.getNodeMetrics(node, contentWidth);
+      ({ width, height } = node.metrics);
 
       if (marks[NodeMark.Blockquote] && lastRow.nodes.length <= 1) {
         const blockquotePaddingLeft = this.render.options.blockquotePaddingLeft;
@@ -84,13 +91,13 @@ export class Computer {
 
       if (width > remainingWidth) isLineFeed = true;
 
+      if (isBlock) isLineFeed = true;
+
       if (isLineFeed || i === nodes.length - 1) {
         const rowSpacing = this.getRowSpacing(nodes[i - 1] || nodes[i]);
         lastRow.height += rowSpacing;
         lastRow.rowSpacing = rowSpacing;
       }
-
-      if (isBlock) isLineFeed = true;
 
       if (isLineFeed) {
         rows.push({
@@ -137,16 +144,17 @@ export class Computer {
     return "#000000";
   }
 
-  public getNodeMetrics(node: INode) {
+  public getNodeMetrics(node: INode, contentWidth: number) {
     switch (node.type) {
       case NodeType.Text:
       case NodeType.LineFeed:
         return this.getTextNodeMetrics(node);
       case NodeType.HorizontalRule:
         return this.getHorizontalRuleNodeMetrics(node);
-      case NodeType.Image: {
+      case NodeType.Image:
         return this.getImageMetrics(node);
-      }
+      case NodeType.CodeBlock:
+        return this.getCodeBlockMetrics(node, contentWidth);
     }
   }
 
@@ -158,7 +166,9 @@ export class Computer {
     const textMetrics = ctx.measureText(node.text || "");
     ctx.restore();
     return {
-      width: textMetrics.width + this.render.options.textSpacing,
+      width: textMetrics.width
+        ? textMetrics.width + this.render.options.textSpacing
+        : 0,
       height:
         textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent,
       fontBoundingBoxAscent: textMetrics.fontBoundingBoxAscent,
@@ -182,7 +192,18 @@ export class Computer {
       metrics.width = contentWidth;
       metrics.height = height * (1 - (width - contentWidth) / width);
     }
-    
+
     return metrics;
+  }
+
+  public getCodeBlockMetrics(node: INode, contentWidth: number) {
+    const paddings = this.render.options.codeBlockPaddings;
+    return {
+      width: contentWidth,
+      height:
+        node.rows.reduce((h, item) => h + item.height, 0) +
+        paddings[0] +
+        paddings[2],
+    };
   }
 }

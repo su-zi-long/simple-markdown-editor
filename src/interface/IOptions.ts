@@ -10,4 +10,5 @@ export interface IOptions {
   defaultFontFamily?: string;
   blockquotePaddingLeft?: number;
   blockquoteMargin?: number;
+  codeBlockPaddings?: [number, number, number, number];
 }

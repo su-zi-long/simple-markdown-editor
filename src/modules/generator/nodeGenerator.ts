@@ -6,20 +6,26 @@ export function generateTextNodes(texts: string, marks: IMarks = {}) {
   const nodes: INode[] = [];
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i];
-    nodes.push({
-      index: 0,
-      type: NodeType.Text,
-      text,
-      metrics: {
-        width: 0,
-        height: 0,
-      },
-      coordinate: {
-        x: 0,
-        y: 0,
-      },
-      marks,
-    });
+    let node;
+    if (~text.indexOf("\n")) {
+      node = generateLineFeedNode();
+    } else {
+      node = {
+        index: 0,
+        type: NodeType.Text,
+        text,
+        metrics: {
+          width: 0,
+          height: 0,
+        },
+        coordinate: {
+          x: 0,
+          y: 0,
+        },
+        marks,
+      };
+    }
+    nodes.push(node);
   }
   return nodes;
 }
@@ -56,7 +62,11 @@ export function generateHorizontalRuleNode(): INode {
   };
 }
 
-export function generateImageNode(imageBase64: string, width: number, height: number): INode {
+export function generateImageNode(
+  imageBase64: string,
+  width: number,
+  height: number
+): INode {
   return {
     index: 0,
     type: NodeType.Image,
@@ -72,5 +82,22 @@ export function generateImageNode(imageBase64: string, width: number, height: nu
       y: 0,
     },
     marks: {},
+  };
+}
+
+export function generateCodeBlockNode(texts: string): INode {
+  return {
+    index: 0,
+    type: NodeType.CodeBlock,
+    metrics: {
+      width: 0,
+      height: 0,
+    },
+    coordinate: {
+      x: 0,
+      y: 0,
+    },
+    marks: {},
+    nodes: generateTextNodes(texts),
   };
 }
