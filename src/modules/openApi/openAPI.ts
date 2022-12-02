@@ -305,4 +305,36 @@ export class OpenAPI {
     }
     interaction.render();
   }
+
+  public toggleStrikethrough() {
+    let startIndex = -1;
+    let endIndex = -1;
+    if (this.editor.interaction.range.hasRange()) {
+      const { startIndexes, endIndexes } =
+        this.editor.interaction.range.getIndexes();
+      startIndex = startIndexes[0] + 1;
+      endIndex = endIndexes[0];
+    } else if (this.editor.interaction.cursor.hasCursor()) {
+      ({ startIndex, endIndex } = getParagraphIndex(
+        this.editor.render.getNodes(),
+        this.editor.interaction.cursor.getIndex()
+      ));
+    } else {
+      return;
+    }
+
+    const nodes = this.editor.render
+      .getNodes()
+      .slice(startIndex, endIndex + 1)
+      .filter((item) => item.type === NodeType.Text);
+    const isAll = nodes.every((item) => item.marks[NodeMark.Strikethrough]);
+    nodes.forEach((item) => {
+      if (isAll) {
+        delete item.marks[NodeMark.Strikethrough];
+      } else {
+        item.marks[NodeMark.Strikethrough] = true;
+      }
+    });
+    this.editor.render.render();
+  }
 }

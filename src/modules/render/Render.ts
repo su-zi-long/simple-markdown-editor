@@ -357,6 +357,15 @@ export class Render {
         color,
       });
     }
+    if (node.marks[NodeMark.Strikethrough] === true) {
+      this.renderLine({
+        ctx,
+        startX: x,
+        startY: y + height / 2,
+        endX: x + width,
+        endY: y + height / 2,
+      });
+    }
 
     ctx.save();
     ctx.font = this.computer.getNodeFont(node);

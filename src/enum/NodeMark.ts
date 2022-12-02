@@ -9,4 +9,5 @@ export enum NodeMark {
   Code = "Code",
   CodeBlock = "CodeBlock",
   Link = "Link",
+  Strikethrough = "Strikethrough",
 }

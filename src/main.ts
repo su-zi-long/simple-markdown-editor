@@ -3,7 +3,7 @@ import { IOptions } from "./interface/IOptions";
 import { Event } from "./modules/event/Event";
 import { Render } from "./modules/render/Render";
 import { Interaction } from "./modules/interaction/Interaction";
-import { OpenAPI } from "./modules/openApi/openAPI";
+import { OpenAPI } from "./modules/openAPI/openAPI";
 
 /**
  * 编辑器核心类
